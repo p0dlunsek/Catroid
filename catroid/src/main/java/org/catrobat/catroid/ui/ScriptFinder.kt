@@ -50,23 +50,23 @@ import java.util.ArrayList
 import java.util.Locale
 
 class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+    enum class Type(val id: Int){
+        SCRIPT(3),
+        LOOK(4),
+        SOUND(5)
+    }
 
     private var onResultFoundListener: OnResultFoundListener? = null
     private var onCloseListener: OnCloseListener? = null
     private var onOpenListener: OnOpenListener? = null
     private val projectManager: ProjectManager by inject(ProjectManager::class.java)
-
-    private var searchResults: MutableList<Array<Int>>? = null
-    private var searchResultIndex = 0
-    private var searchQuery = ""
-
     private var binding: ViewScriptFinderBinding
 
-    private fun showNavigationButtons() {
+    fun showNavigationButtons() {
+        binding.find.visibility = GONE
         binding.findNext.visibility = VISIBLE
         binding.findPrevious.visibility = VISIBLE
         binding.searchPositionIndicator.visibility = VISIBLE
-        binding.find.visibility = GONE
     }
 
     private fun hideNavigationButtons() {
@@ -94,7 +94,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                 Unit
 
             override fun onTextChanged(newText: CharSequence, start: Int, before: Int, count: Int) {
-                if (searchQuery == formatSearchQuery(newText)) {
+                if (FinderDataManager.instance.getSearchQuery() == formatSearchQuery(newText)) {
                     showNavigationButtons()
                 } else {
                     hideNavigationButtons()
@@ -149,13 +149,13 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     private fun find() {
         val query = formatSearchQuery(binding.searchBar.text)
         if (query.isNotEmpty()) {
-            if (searchQuery != query) {
-                searchQuery = query
+            if (FinderDataManager.instance.getSearchQuery() != query) {
+                FinderDataManager.instance.setSearchQuery(query)
                 fillIndices(query)
                 binding.find.visibility = GONE
                 binding.findNext.visibility = VISIBLE
                 binding.findPrevious.visibility = VISIBLE
-            } else if (searchResults != null) {
+            } else if (FinderDataManager.instance.getSearchResults() != null) {
                 findNext()
             }
         } else {
@@ -167,9 +167,9 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
 
     private fun findNext() {
-        searchResults?.let {
+        FinderDataManager.instance.getSearchResults()?.let {
             if (it.isNotEmpty()) {
-                searchResultIndex = (searchResultIndex + 1) % it.size
+                FinderDataManager.instance.setSearchResultIndex((FinderDataManager.instance.getSearchResultIndex() + 1) % it.size)
                 updateUI()
             } else {
                 binding.searchPositionIndicator.text = "0/0"
@@ -179,10 +179,11 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
 
     private fun findPrevious() {
-        searchResults?.let {
+        FinderDataManager.instance.getSearchResults()?.let {
             if (it.isNotEmpty()) {
-                searchResultIndex =
-                    if (searchResultIndex == 0) it.size - 1 else searchResultIndex - 1
+                FinderDataManager.instance.setSearchResultIndex(if (FinderDataManager.instance
+                                                                        .getSearchResultIndex() == 0)
+                    it.size - 1 else FinderDataManager.instance.getSearchResultIndex() - 1)
                 updateUI()
             } else {
                 binding.searchPositionIndicator.text = "0/0"
@@ -191,17 +192,27 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
         }
     }
 
-    private fun updateUI() {
-        val result = searchResults?.get(searchResultIndex)
+    fun onFragmentChanged(SceneAndSpriteName:String) {
+        open()
+        showNavigationButtons()
+
         binding.searchPositionIndicator.text = String.format(
-            Locale.ROOT, "%d/%d", searchResultIndex + 1,
-            searchResults?.size
+            Locale.ROOT, "%d/%d", FinderDataManager.instance.getSearchResultIndex() + 1,
+            FinderDataManager.instance.getSearchResults()?.size
+        )
+        binding.sceneAndSpriteName.text = SceneAndSpriteName
+    }
+    private fun updateUI() {
+        val result = FinderDataManager.instance.getSearchResults()?.get(FinderDataManager.instance.getSearchResultIndex())
+        binding.searchPositionIndicator.text = String.format(
+            Locale.ROOT, "%d/%d", FinderDataManager.instance.getSearchResultIndex() + 1,
+            FinderDataManager.instance.getSearchResults()?.size
         )
 
         result?.let {
-            searchResults?.size?.let { it1 ->
+            FinderDataManager.instance.getSearchResults()?.size?.let { it1 ->
                 onResultFoundListener?.onResultFound(
-                    it[0], it[1], it[2], it1,
+                    it[0], it[1], it[2],it[3], it1,
                     binding.sceneAndSpriteName
                 )
             }
@@ -209,14 +220,14 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
 
     fun fillIndices(query: String) {
-        searchResultIndex = -1
+        FinderDataManager.instance.setSearchResultIndex(-1)
         val activeScene = projectManager.currentlyEditedScene
         val activeSprite = projectManager.currentSprite
 
-        if (searchResults != null) {
-            searchResults?.clear()
+        if (FinderDataManager.instance.getSearchResults() != null) {
+            FinderDataManager.instance.clearSearchResults()
         } else {
-            searchResults = ArrayList()
+            FinderDataManager.instance.initializeSearchResults()
         }
         startThreadToFillIndices(query, activeScene, activeSprite)
     }
@@ -248,10 +259,26 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                         script.setParents()
                         script.addToFlatList(bricks)
                     }
-                    for (k in bricks.indices) {
-                        val brick = bricks[k]
-                        if (searchBrickViews(brick.getView(context), query)) {
-                            searchResults?.add(arrayOf(i, j, k))
+                    for (order in FinderDataManager.instance.getSearchOrder()){
+                        when (order) {
+                            1 -> {
+                                for (k in bricks.indices) {
+                                    val brick = bricks[k]
+                                    if (searchBrickViews(brick.getView(context), query)) {
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SCRIPT.id))
+                                    }
+                                }
+                            }
+                            3 -> {
+                                val soundList = sprite.soundList
+                                for (k in soundList.indices) {
+                                    val sound = soundList[k]
+                                    if (sound.name.toLowerCase(Locale.ROOT).contains(FinderDataManager
+                                                                                         .instance.getSearchQuery())) {
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SOUND.id))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -275,6 +302,9 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     val isOpen: Boolean
         get() = visibility == VISIBLE
 
+    fun setInitiatingFragment(fragmentEnum: FinderDataManager.InitiatingFragmentEnum){
+        FinderDataManager.instance.setInitiatingFragment(fragmentEnum)
+    }
     fun open() {
         this.visibility = VISIBLE
         val inputMethodManager =
@@ -289,12 +319,13 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
 
     fun close() {
         this.visibility = GONE
-        searchResults?.clear()
+        FinderDataManager.instance.clearSearchResults()
 
         binding.searchBar.setText("")
-        searchQuery = ""
+        FinderDataManager.instance.setSearchQuery("")
         onCloseListener?.onClose()
         this.hideKeyboard()
+        FinderDataManager.instance.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.NONE)
     }
 
     val isClosed: Boolean
@@ -317,6 +348,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
             sceneIndex: Int,
             spriteIndex: Int,
             brickIndex: Int,
+            type: Int,
             totalResults: Int,
             textView: TextView?
         )

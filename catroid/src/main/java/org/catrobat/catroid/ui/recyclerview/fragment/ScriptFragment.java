@@ -39,7 +39,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ListAdapter;
 
+import com.google.android.material.tabs.TabLayout;
+
 import org.catrobat.catroid.BuildConfig;
+
 import org.catrobat.catroid.ProjectManager;
 import org.catrobat.catroid.R;
 import org.catrobat.catroid.common.ScreenValues;
@@ -64,8 +67,10 @@ import org.catrobat.catroid.io.XstreamSerializer;
 import org.catrobat.catroid.io.asynctask.ProjectLoader;
 import org.catrobat.catroid.io.asynctask.ProjectSaver;
 import org.catrobat.catroid.ui.BottomBar;
+import org.catrobat.catroid.ui.FinderDataManager;
 import org.catrobat.catroid.ui.ScriptFinder;
 import org.catrobat.catroid.ui.SpriteActivity;
+import org.catrobat.catroid.ui.SpriteActivityOnTabSelectedListenerKt;
 import org.catrobat.catroid.ui.UiUtils;
 import org.catrobat.catroid.ui.controller.BackpackListManager;
 import org.catrobat.catroid.ui.controller.RecentBrickListManager;
@@ -274,7 +279,6 @@ public class ScriptFragment extends ListFragment implements
 		actionMode = null;
 		adapter.setCheckBoxMode(BrickAdapter.NONE);
 	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = View.inflate(getActivity(), R.layout.fragment_script, null);
@@ -292,7 +296,8 @@ public class ScriptFragment extends ListFragment implements
 		SettingsFragment.setToChosenLanguage(activity);
 
 		scriptFinder = view.findViewById(R.id.findview);
-		scriptFinder.setOnResultFoundListener((sceneIndex, spriteIndex, brickIndex, totalResults,
+		scriptFinder.setOnResultFoundListener((sceneIndex, spriteIndex, brickIndex,type,
+				totalResults,
 				textView
 				) -> {
 			Project currentProject = ProjectManager.getInstance().getCurrentProject();
@@ -305,6 +310,11 @@ public class ScriptFragment extends ListFragment implements
 
 			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(),
 					currentSprite.getName());
+
+			if(type == ScriptFinder.Type.SOUND.getId()){
+				SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,2);
+				SpriteActivityOnTabSelectedListenerKt.addTabLayout(activity,2);
+			}
 
 			adapter.updateItems(currentSprite);
 			adapter.notifyDataSetChanged();
@@ -326,9 +336,23 @@ public class ScriptFragment extends ListFragment implements
 		});
 
 		scriptFinder.setOnOpenListener(() -> {
+			scriptFinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SCRIPT);
+			Integer[] order = {1, 3};
+			FinderDataManager.Companion.getInstance().setSearchOrder(order);
 			activity.removeTabs();
 			activity.findViewById(R.id.toolbar).setVisibility(View.GONE);
 		});
+
+		if (FinderDataManager.Companion.getInstance().getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+			String sceneAndSpriteName =
+					createActionBarTitle(ProjectManager.getInstance().getCurrentProject(),
+							ProjectManager.getInstance().getStartScene(),ProjectManager.getInstance().getCurrentSprite());
+			scriptFinder.onFragmentChanged(sceneAndSpriteName);
+			int indexSearch = FinderDataManager.Companion.getInstance().getSearchResultIndex();
+			int brickIndex = FinderDataManager.Companion.getInstance().getSearchResults().get(indexSearch)[2];
+			listView.smoothScrollToPosition(brickIndex);
+			highlightBrickAtIndex(brickIndex);
+		}
 
 		setHasOptionsMenu(true);
 		return view;
