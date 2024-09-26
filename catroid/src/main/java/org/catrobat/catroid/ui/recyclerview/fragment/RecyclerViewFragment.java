@@ -399,7 +399,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 		} else {
 			actionModeType = type;
 			actionMode = getActivity().startActionMode(this);
-			BottomBar.hideBottomBar(getActivity());
+			//BottomBar.hideBottomBar(getActivity());
 		}
 	}
 

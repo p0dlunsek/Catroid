@@ -311,9 +311,15 @@ public class ScriptFragment extends ListFragment implements
 			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(),
 					currentSprite.getName());
 
-			if(type == ScriptFinder.Type.SOUND.getId()){
-				SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,2);
-				SpriteActivityOnTabSelectedListenerKt.addTabLayout(activity,2);
+			if(type != ScriptFinder.Type.SCRIPT.getId()){
+				switch (type){
+					case 4:
+						SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,1);
+						break;
+					case 5:
+						SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,2);
+						break;
+				}
 			}
 
 			adapter.updateItems(currentSprite);
@@ -337,7 +343,7 @@ public class ScriptFragment extends ListFragment implements
 
 		scriptFinder.setOnOpenListener(() -> {
 			scriptFinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SCRIPT);
-			Integer[] order = {1, 3};
+			Integer[] order = {1,2,3};
 			FinderDataManager.Companion.getInstance().setSearchOrder(order);
 			activity.removeTabs();
 			activity.findViewById(R.id.toolbar).setVisibility(View.GONE);

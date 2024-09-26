@@ -24,21 +24,32 @@ package org.catrobat.catroid.ui.recyclerview.fragment
 
 import android.app.Activity
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.annotation.PluralsRes
 import org.catrobat.catroid.ProjectManager
 import org.catrobat.catroid.R
 import org.catrobat.catroid.common.Constants
 import org.catrobat.catroid.common.LookData
 import org.catrobat.catroid.common.SharedPreferenceKeys.SHOW_DETAILS_LOOKS_PREFERENCE_KEY
+import org.catrobat.catroid.content.Project
+import org.catrobat.catroid.content.Scene
+import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.io.StorageOperations
+import org.catrobat.catroid.ui.FinderDataManager
+import org.catrobat.catroid.ui.ScriptFinder
 import org.catrobat.catroid.ui.SpriteActivity
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.controller.BackpackListManager
+import org.catrobat.catroid.ui.loadFragment
 import org.catrobat.catroid.ui.recyclerview.adapter.LookAdapter
 import org.catrobat.catroid.ui.recyclerview.adapter.multiselection.MultiSelectionManager
 import org.catrobat.catroid.ui.recyclerview.backpack.BackpackActivity
@@ -47,7 +58,6 @@ import org.catrobat.catroid.utils.SnackbarUtil
 import org.catrobat.catroid.utils.ToastUtil
 import org.koin.android.ext.android.inject
 import java.io.IOException
-import java.util.ArrayList
 
 class LookListFragment : RecyclerViewFragment<LookData?>() {
     private val lookController = LookController()
@@ -55,11 +65,97 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
 
     private val projectManager: ProjectManager by inject()
 
+    private lateinit var currentProject: Project
+    private lateinit var currentSprite: Sprite
+    private lateinit var currentScene: Scene
+
     companion object {
         @JvmField
         val TAG = LookListFragment::class.java.simpleName
     }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val parentView = super.onCreateView(inflater, container, savedInstanceState)
+        activity = getActivity() as SpriteActivity?
+        recyclerView = parentView!!.findViewById(R.id.recycler_view)
+        currentProject = ProjectManager.getInstance().currentProject
+        currentScene = ProjectManager.getInstance().currentlyEditedScene
+        currentSprite = ProjectManager.getInstance().currentSprite
 
+        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+            override fun onResultFound(
+                sceneIndex: Int,
+                spriteIndex: Int,
+                brickIndex: Int,
+                type: Int,
+                totalResults: Int,
+                textView: TextView?
+            )   {
+
+                currentProject = ProjectManager.getInstance().currentProject
+                currentScene = currentProject.sceneList[sceneIndex]
+                currentSprite = currentScene.spriteList[spriteIndex]
+
+                textView?.text = createActionBarTitle()
+
+                ProjectManager.getInstance().setCurrentSceneAndSprite(
+                    currentScene.name,
+                    currentSprite.name
+                )
+
+                if (type != ScriptFinder.Type.LOOK.id) {
+                    when (type) {
+                        3 -> activity.loadFragment(0)
+                        5 -> activity.loadFragment(2)
+                    }
+                }
+
+                initializeAdapter()
+                adapter.notifyDataSetChanged()
+                val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+                val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+                if (value != null) {
+                    scriptfinder.showNavigationButtons()
+                    recyclerView.scrollToPosition(value)
+                }
+                hideKeyboard()
+            }
+        })
+        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+            override fun onClose() {
+                finishActionMode()
+                if (!activity.isFinishing) {
+                    activity.setCurrentSceneAndSprite(
+                        ProjectManager.getInstance().currentlyEditedScene,
+                        ProjectManager.getInstance().currentSprite
+                    )
+                    activity.supportActionBar?.title = activity.createActionBarTitle()
+                    activity.addTabs()
+                }
+                activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
+            }
+        })
+
+        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+            override fun onOpen() {
+                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.LOOK)
+                val order = arrayOf(2,3,1)
+                FinderDataManager.instance.setSearchOrder(order)
+                activity.removeTabs()
+                activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
+            }
+        })
+
+        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+            val sceneAndSpriteName = createActionBarTitle()
+            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+            if (value != null) {
+                recyclerView.scrollToPosition(value)
+            }
+        }
+        return parentView
+    }
     override fun initializeAdapter() {
         sharedPreferenceDetailsKey = SHOW_DETAILS_LOOKS_PREFERENCE_KEY
         val items = projectManager.currentSprite.lookList
@@ -67,7 +163,17 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         emptyView.setText(R.string.fragment_look_text_description)
         onAdapterReady()
     }
-
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+    }
+    fun createActionBarTitle(): String {
+        return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
+            currentSprite.name
+        } else {
+            currentScene.name + ": " + currentSprite.name
+        }
+    }
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         menu.findItem(R.id.catblocks_reorder_scripts).isVisible = false

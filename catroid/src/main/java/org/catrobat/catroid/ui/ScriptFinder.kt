@@ -243,6 +243,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                     binding.progressBar.visibility = VISIBLE
                 }
             }
+            //for (project in projectManager.)
             val scenes = projectManager.currentProject.sceneList
             for (i in scenes.indices) {
                 val scene = scenes[i]
@@ -266,6 +267,16 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                     val brick = bricks[k]
                                     if (searchBrickViews(brick.getView(context), query)) {
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SCRIPT.id))
+                                    }
+                                }
+                            }
+                            2 -> {
+                                val lookList = sprite.lookList
+                                for (k in lookList.indices) {
+                                    val look = lookList[k]
+                                    if (look.name.toLowerCase(Locale.ROOT).contains(FinderDataManager
+                                                                                         .instance.getSearchQuery())) {
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.LOOK.id))
                                     }
                                 }
                             }

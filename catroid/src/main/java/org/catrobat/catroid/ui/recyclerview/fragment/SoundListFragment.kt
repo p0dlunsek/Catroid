@@ -101,9 +101,11 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                     currentSprite.name
                 )
 
-                if (type == ScriptFinder.Type.SCRIPT.id) {
-                    activity.loadFragment(0)
-                    activity.addTabLayout(0)
+                if (type != ScriptFinder.Type.SOUND.id) {
+                    when (type) {
+                        3 -> activity.loadFragment(0)
+                        4 -> activity.loadFragment(1)
+                    }
                 }
 
                 initializeAdapter()
@@ -135,7 +137,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
             override fun onOpen() {
                 scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
-                val order = arrayOf(3, 1)
+                val order = arrayOf(3,1,2)
                 instance.setSearchOrder(order)
                 activity.removeTabs()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
@@ -160,7 +162,6 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         emptyView.setText(R.string.fragment_sound_text_description)
         onAdapterReady()
     }
-
     private fun hideKeyboard() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(requireView().windowToken, 0)
