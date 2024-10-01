@@ -343,7 +343,7 @@ public class ScriptFragment extends ListFragment implements
 
 		scriptFinder.setOnOpenListener(() -> {
 			scriptFinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SCRIPT);
-			Integer[] order = {1,2,3};
+			Integer[] order = {3,4,5};
 			FinderDataManager.Companion.getInstance().setSearchOrder(order);
 			activity.removeTabs();
 			activity.findViewById(R.id.toolbar).setVisibility(View.GONE);

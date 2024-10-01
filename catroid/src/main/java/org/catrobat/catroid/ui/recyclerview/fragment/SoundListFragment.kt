@@ -137,7 +137,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
             override fun onOpen() {
                 scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
-                val order = arrayOf(3,1,2)
+                val order = arrayOf(5,3,4)
                 instance.setSearchOrder(order)
                 activity.removeTabs()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE

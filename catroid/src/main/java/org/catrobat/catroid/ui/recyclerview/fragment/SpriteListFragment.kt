@@ -24,14 +24,20 @@ package org.catrobat.catroid.ui.recyclerview.fragment
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.annotation.PluralsRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -43,15 +49,21 @@ import org.catrobat.catroid.common.Constants.TMP_IMAGE_FILE_NAME
 import org.catrobat.catroid.common.FlavoredConstants
 import org.catrobat.catroid.common.SharedPreferenceKeys
 import org.catrobat.catroid.content.GroupSprite
+import org.catrobat.catroid.content.Project
+import org.catrobat.catroid.content.Scene
 import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.io.StorageOperations
 import org.catrobat.catroid.merge.ImportProjectHelper
+import org.catrobat.catroid.ui.FinderDataManager
+import org.catrobat.catroid.ui.ProjectActivity
 import org.catrobat.catroid.ui.ProjectListActivity
 import org.catrobat.catroid.ui.ProjectListActivity.Companion.IMPORT_LOCAL_INTENT
 import org.catrobat.catroid.ui.SpriteActivity
+import org.catrobat.catroid.ui.ScriptFinder
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.WebViewActivity
 import org.catrobat.catroid.ui.controller.BackpackListManager
+import org.catrobat.catroid.ui.loadFragment
 import org.catrobat.catroid.ui.recyclerview.adapter.MultiViewSpriteAdapter
 import org.catrobat.catroid.ui.recyclerview.adapter.draganddrop.TouchHelperAdapterInterface
 import org.catrobat.catroid.ui.recyclerview.adapter.draganddrop.TouchHelperCallback
@@ -62,6 +74,7 @@ import org.catrobat.catroid.ui.recyclerview.dialog.TextInputDialog
 import org.catrobat.catroid.ui.recyclerview.dialog.textwatcher.DuplicateInputTextWatcher
 import org.catrobat.catroid.ui.recyclerview.util.UniqueNameProvider
 import org.catrobat.catroid.ui.recyclerview.viewholder.CheckableViewHolder
+import org.catrobat.catroid.ui.removeTabLayout
 import org.catrobat.catroid.utils.SnackbarUtil
 import org.catrobat.catroid.utils.ToastUtil
 import org.koin.android.ext.android.inject
@@ -74,6 +87,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     private val projectManager: ProjectManager by inject()
 
     private var currentSprite: Sprite? = null
+    private lateinit var currentProject: Project
+    private lateinit var currentScene: Scene
 
     internal inner class MultiViewTouchHelperCallback(adapterInterface: TouchHelperAdapterInterface?) :
         TouchHelperCallback(adapterInterface) {
@@ -106,6 +121,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     public override fun shouldShowEmptyView() = adapter.itemCount == 1
 
     override fun onResume() {
+        currentScene = ProjectManager.getInstance().currentlyEditedScene
         initializeAdapter()
         super.onResume()
         SnackbarUtil.showHintSnackbar(requireActivity(), R.string.hint_objects)
@@ -119,8 +135,120 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
             .putBoolean(SharedPreferenceKeys.INDEXING_VARIABLE_PREFERENCE_KEY, false).apply()
         (requireActivity() as AppCompatActivity).supportActionBar?.title = title
-    }
 
+        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+            val sceneAndSpriteName = createActionBarTitle()
+            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+            if (value != null) {
+                recyclerView.scrollToPosition(value)
+            }
+        }
+        else{
+            scriptfinder.close()
+        }
+    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val parentView = super.onCreateView(inflater, container, savedInstanceState)
+        recyclerView = parentView!!.findViewById(R.id.recycler_view)
+        currentProject = ProjectManager.getInstance().currentProject
+        currentScene = ProjectManager.getInstance().currentlyEditedScene
+        //currentSprite = ProjectManager.getInstance().currentSprite
+        val activity = getActivity() as ProjectActivity
+
+        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+            override fun onResultFound(
+                sceneIndex: Int,
+                spriteIndex: Int,
+                brickIndex: Int,
+                type: Int,
+                totalResults: Int,
+                textView: TextView?
+            )   {
+
+                currentProject = ProjectManager.getInstance().currentProject
+                currentScene = currentProject.sceneList[sceneIndex]
+                currentSprite = currentScene.spriteList[spriteIndex]
+
+                textView?.text = createActionBarTitle()
+                ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+
+                if (type != ScriptFinder.Type.SPRITE.id) {
+                    projectManager.currentSprite = currentSprite
+                    val intent = Intent(requireContext(), SpriteActivity::class.java)
+                    when (type) {
+                        ScriptFinder.Type.SCRIPT.id -> {
+                            intent.putExtra(
+                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                                SpriteActivity.FRAGMENT_SCRIPTS
+                            )
+                        }
+                        ScriptFinder.Type.LOOK.id -> {
+                            intent.putExtra(
+                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                                SpriteActivity.FRAGMENT_LOOKS
+                            )
+                        }
+                        ScriptFinder.Type.SOUND.id -> {
+                            intent.putExtra(
+                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                                SpriteActivity.FRAGMENT_SOUNDS
+                            )
+                        }
+                    }
+                    startActivity(intent)
+                }
+                initializeAdapter()
+                adapter.notifyDataSetChanged()
+                val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+                val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+                if (value != null) {
+                    scriptfinder.showNavigationButtons()
+                    recyclerView.scrollToPosition(value)
+                }
+                hideKeyboard()
+            }
+        })
+
+        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+            override fun onClose() {
+                activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
+            }
+        })
+
+        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+            override fun onOpen() {
+                activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
+                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SPRITE)
+                val order = arrayOf(2,3,4,5)
+                FinderDataManager.instance.setSearchOrder(order)
+            }
+        })
+
+        /*if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager
+            .InitiatingFragmentEnum.NONE) {
+            val sceneAndSpriteName = createActionBarTitle()
+            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+            if (value != null) {
+                recyclerView.scrollToPosition(value)
+            }
+        }
+        else{
+            scriptfinder.close()
+        }*/
+        return parentView
+
+    }
+    fun createActionBarTitle(): String {
+        return currentScene.name
+    }
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+    }
     override fun onAdapterReady() {
         super.onAdapterReady()
         val callback: ItemTouchHelper.Callback = MultiViewTouchHelperCallback(adapter)
@@ -131,6 +259,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         menu.findItem(R.id.new_group).isVisible = true
+        menu.findItem(R.id.find).isVisible = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

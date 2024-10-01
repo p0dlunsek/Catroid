@@ -51,6 +51,7 @@ import java.util.Locale
 
 class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     enum class Type(val id: Int){
+        SPRITE(2),
         SCRIPT(3),
         LOOK(4),
         SOUND(5)
@@ -222,7 +223,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     fun fillIndices(query: String) {
         FinderDataManager.instance.setSearchResultIndex(-1)
         val activeScene = projectManager.currentlyEditedScene
-        val activeSprite = projectManager.currentSprite
+        val activeSprite: Sprite? = projectManager.currentSprite
 
         if (FinderDataManager.instance.getSearchResults() != null) {
             FinderDataManager.instance.clearSearchResults()
@@ -232,7 +233,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
         startThreadToFillIndices(query, activeScene, activeSprite)
     }
 
-    private fun startThreadToFillIndices(query: String, activeScene: Scene, activeSprite: Sprite) {
+    private fun startThreadToFillIndices(query: String, activeScene: Scene, activeSprite: Sprite?) {
         Thread {
             val activity = context as Activity
             if (!activity.isFinishing) {
@@ -243,7 +244,6 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                     binding.progressBar.visibility = VISIBLE
                 }
             }
-            //for (project in projectManager.)
             val scenes = projectManager.currentProject.sceneList
             for (i in scenes.indices) {
                 val scene = scenes[i]
@@ -262,7 +262,11 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                     }
                     for (order in FinderDataManager.instance.getSearchOrder()){
                         when (order) {
-                            1 -> {
+                            2 -> {
+                                    if (sprite.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery()))
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, j, Type.SPRITE.id))
+                            }
+                            3 -> {
                                 for (k in bricks.indices) {
                                     val brick = bricks[k]
                                     if (searchBrickViews(brick.getView(context), query)) {
@@ -270,22 +274,20 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                     }
                                 }
                             }
-                            2 -> {
+                            4 -> {
                                 val lookList = sprite.lookList
                                 for (k in lookList.indices) {
                                     val look = lookList[k]
-                                    if (look.name.toLowerCase(Locale.ROOT).contains(FinderDataManager
-                                                                                         .instance.getSearchQuery())) {
+                                    if (look.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery())) {
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.LOOK.id))
                                     }
                                 }
                             }
-                            3 -> {
+                            5 -> {
                                 val soundList = sprite.soundList
                                 for (k in soundList.indices) {
                                     val sound = soundList[k]
-                                    if (sound.name.toLowerCase(Locale.ROOT).contains(FinderDataManager
-                                                                                         .instance.getSearchQuery())) {
+                                    if (sound.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery())) {
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SOUND.id))
                                     }
                                 }
@@ -300,10 +302,12 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                     binding.findPrevious.visibility = VISIBLE
                     binding.searchPositionIndicator.visibility = VISIBLE
                     binding.progressBar.visibility = GONE
-                    projectManager.setCurrentSceneAndSprite(
-                        activeScene.name,
-                        activeSprite.name
-                    )
+                    if (activeSprite != null){
+                        projectManager.setCurrentSceneAndSprite(
+                            activeScene.name,
+                            activeSprite.name
+                        )
+                    }
                     findNext()
                 }
             }

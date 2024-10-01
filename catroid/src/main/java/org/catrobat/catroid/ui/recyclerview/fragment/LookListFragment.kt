@@ -104,6 +104,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
 
                 if (type != ScriptFinder.Type.LOOK.id) {
                     when (type) {
+                        2 -> activity.onBackPressed()
                         3 -> activity.loadFragment(0)
                         5 -> activity.loadFragment(2)
                     }
@@ -138,7 +139,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
             override fun onOpen() {
                 scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.LOOK)
-                val order = arrayOf(2,3,1)
+                val order = arrayOf(4,5,3)
                 FinderDataManager.instance.setSearchOrder(order)
                 activity.removeTabs()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE

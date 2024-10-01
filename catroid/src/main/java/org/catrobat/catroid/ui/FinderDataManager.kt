@@ -33,6 +33,7 @@ class FinderDataManager {
     }
     enum class InitiatingFragmentEnum(val id: Int){
         NONE(0),
+        SPRITE(2),
         SCRIPT(3),
         LOOK(4),
         SOUND(5)

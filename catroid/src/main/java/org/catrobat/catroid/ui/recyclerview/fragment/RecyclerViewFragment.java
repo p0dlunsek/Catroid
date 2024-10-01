@@ -64,6 +64,7 @@ import androidx.annotation.PluralsRes;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -344,6 +345,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 				break;
 			case R.id.find:
 				scriptfinder.open();
+				break;
 			case R.id.show_details:
 				adapter.showDetails = !adapter.showDetails;
 				PreferenceManager.getDefaultSharedPreferences(getActivity())
@@ -399,7 +401,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 		} else {
 			actionModeType = type;
 			actionMode = getActivity().startActionMode(this);
-			//BottomBar.hideBottomBar(getActivity());
+			BottomBar.hideBottomBar(getActivity());
 		}
 	}
 

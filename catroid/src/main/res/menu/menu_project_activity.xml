@@ -73,6 +73,11 @@
         app:showAsAction="never"
         android:icon="@drawable/ic_settings"/>
     <item
+        android:id="@+id/find"
+        android:title="@string/search"
+        android:icon="@drawable/ic_search_menu"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/from_library"
         android:title="@string/from_library"
         android:icon="@drawable/ic_apps_small"
@@ -87,4 +92,5 @@
       android:title="@string/from_local"
       app:showAsAction="never"
       android:icon="@drawable/ic_library_add_small"/>
+
 </menu>
