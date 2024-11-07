@@ -92,31 +92,42 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
 
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
-                currentSprite = currentScene.spriteList[spriteIndex]
 
-                textView?.text = createActionBarTitle()
-
-                ProjectManager.getInstance().setCurrentSceneAndSprite(
-                    currentScene.name,
-                    currentSprite.name
-                )
+                if(type == ScriptFinder.Type.SPRITE.id) {
+                    textView?.text = createActionBarTitle(2)
+                }
+                else{
+                    currentSprite = currentScene.spriteList[spriteIndex]
+                    textView?.text = createActionBarTitle(1)
+                }
 
                 if (type != ScriptFinder.Type.SOUND.id) {
                     when (type) {
-                        3 -> activity.loadFragment(0)
-                        4 -> activity.loadFragment(1)
+                        2 -> {
+                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                            activity.onBackPressed()
+                        }
+                        3 -> {
+                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                            activity.loadFragment(0)
+                        }
+                        4 -> {
+                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                            activity.loadFragment(1)
+                        }
                     }
                 }
-
-                initializeAdapter()
-                adapter.notifyDataSetChanged()
-                val indexSearch = instance.getSearchResultIndex()
-                val value = instance.getSearchResults()?.get(indexSearch)?.get(2)
-                if (value != null) {
-                    scriptfinder.showNavigationButtons()
-                    recyclerView.scrollToPosition(value)
+                else{
+                    val indexSearch = instance.getSearchResultIndex()
+                    val value = instance.getSearchResults()?.get(indexSearch)?.get(2)
+                    if (value != null) {
+                        scriptfinder.showNavigationButtons()
+                        recyclerView.scrollToPosition(value)
+                    }
+                    initializeAdapter()
+                    adapter.notifyDataSetChanged()
+                    hideKeyboard()
                 }
-                hideKeyboard()
             }
         })
         scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
@@ -145,7 +156,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         })
 
         if (instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
-            val sceneAndSpriteName = createActionBarTitle()
+            val sceneAndSpriteName = createActionBarTitle(1)
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
             val indexSearch = instance.getSearchResultIndex()
             val value = instance.getSearchResults()?.get(indexSearch)?.get(2)
@@ -166,11 +177,16 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
-    fun createActionBarTitle(): String {
-        return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
-            currentSprite.name
-        } else {
-            currentScene.name + ": " + currentSprite.name
+    fun createActionBarTitle(flag: Int): String {
+        if(flag == 1) {
+            return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
+                currentSprite.name
+            } else {
+                currentScene.name + ": " + currentSprite.name
+            }
+        }
+        else{
+            return currentScene.name
         }
     }
 

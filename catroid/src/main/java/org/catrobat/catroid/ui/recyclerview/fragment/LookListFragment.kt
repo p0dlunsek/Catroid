@@ -93,31 +93,42 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
 
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
-                currentSprite = currentScene.spriteList[spriteIndex]
 
-                textView?.text = createActionBarTitle()
+                if(type == ScriptFinder.Type.SPRITE.id) {
+                    textView?.text = createActionBarTitle(2)
+                }
+                else{
+                    currentSprite = currentScene.spriteList[spriteIndex]
+                    textView?.text = createActionBarTitle(1)
+                }
 
-                ProjectManager.getInstance().setCurrentSceneAndSprite(
-                    currentScene.name,
-                    currentSprite.name
-                )
 
                 if (type != ScriptFinder.Type.LOOK.id) {
                     when (type) {
-                        2 -> activity.onBackPressed()
-                        3 -> activity.loadFragment(0)
-                        5 -> activity.loadFragment(2)
+                        2 -> {
+                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                            activity.onBackPressed()
+                        }
+                        3 -> {
+                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                            activity.loadFragment(0)
+                        }
+                        5 -> {
+                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                            activity.loadFragment(2)
+                        }
                     }
                 }
-
+                else{
+                    val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+                    val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+                    if (value != null) {
+                        scriptfinder.showNavigationButtons()
+                        recyclerView.scrollToPosition(value)
+                    }
+                }
                 initializeAdapter()
                 adapter.notifyDataSetChanged()
-                val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-                val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-                if (value != null) {
-                    scriptfinder.showNavigationButtons()
-                    recyclerView.scrollToPosition(value)
-                }
                 hideKeyboard()
             }
         })
@@ -129,7 +140,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
                         ProjectManager.getInstance().currentlyEditedScene,
                         ProjectManager.getInstance().currentSprite
                     )
-                    activity.supportActionBar?.title = activity.createActionBarTitle()
+                    activity.supportActionBar?.title = createActionBarTitle(1)
                     activity.addTabs()
                 }
                 activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
@@ -147,7 +158,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         })
 
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
-            val sceneAndSpriteName = createActionBarTitle()
+            val sceneAndSpriteName = createActionBarTitle(1)
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
             val indexSearch = FinderDataManager.instance.getSearchResultIndex()
             val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
@@ -168,11 +179,16 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
-    fun createActionBarTitle(): String {
-        return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
-            currentSprite.name
-        } else {
-            currentScene.name + ": " + currentSprite.name
+    fun createActionBarTitle(flag: Int): String {
+        if(flag == 1) {
+            return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
+                currentSprite.name
+            } else {
+                currentScene.name + ": " + currentSprite.name
+            }
+        }
+        else{
+            return currentScene.name
         }
     }
     override fun onPrepareOptionsMenu(menu: Menu) {

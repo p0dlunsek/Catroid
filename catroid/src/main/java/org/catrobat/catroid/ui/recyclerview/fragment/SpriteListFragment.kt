@@ -137,7 +137,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = title
 
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
-            val sceneAndSpriteName = createActionBarTitle()
+            val sceneAndSpriteName = createActionBarTitle(2)
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
             val indexSearch = FinderDataManager.instance.getSearchResultIndex()
             val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
@@ -154,7 +154,6 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         recyclerView = parentView!!.findViewById(R.id.recycler_view)
         currentProject = ProjectManager.getInstance().currentProject
         currentScene = ProjectManager.getInstance().currentlyEditedScene
-        //currentSprite = ProjectManager.getInstance().currentSprite
         val activity = getActivity() as ProjectActivity
 
         scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
@@ -169,9 +168,15 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
 
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
-                currentSprite = currentScene.spriteList[spriteIndex]
 
-                textView?.text = createActionBarTitle()
+                if(type == ScriptFinder.Type.SPRITE.id) {
+                    textView?.text = createActionBarTitle(2)
+                }
+                else{
+                    currentSprite = currentScene.spriteList[spriteIndex]
+                    textView?.text = createActionBarTitle(1)
+                }
+
                 ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
 
                 if (type != ScriptFinder.Type.SPRITE.id) {
@@ -199,13 +204,15 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                     }
                     startActivity(intent)
                 }
-                initializeAdapter()
-                adapter.notifyDataSetChanged()
-                val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-                val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-                if (value != null) {
-                    scriptfinder.showNavigationButtons()
-                    recyclerView.scrollToPosition(value)
+                else{
+                    initializeAdapter()
+                    adapter.notifyDataSetChanged()
+                    val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+                    val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+                    if (value != null) {
+                        scriptfinder.showNavigationButtons()
+                        recyclerView.scrollToPosition(value)
+                    }
                 }
                 hideKeyboard()
             }
@@ -242,7 +249,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         return parentView
 
     }
-    fun createActionBarTitle(): String {
+    fun createActionBarTitle(flag: Int): String {
         return currentScene.name
     }
     private fun hideKeyboard() {
@@ -458,6 +465,9 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     }
 
     override fun onItemClick(item: Sprite?, selectionManager: MultiSelectionManager?) {
+        if (scriptfinder.isOpen){
+            scriptfinder.close()
+        }
         if (item is GroupSprite) {
             item.isCollapsed = !item.isCollapsed
             adapter.notifyDataSetChanged()

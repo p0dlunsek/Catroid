@@ -304,29 +304,38 @@ public class ScriptFragment extends ListFragment implements
 			Scene currentScene = currentProject.getSceneList().get(sceneIndex);
 			Sprite currentSprite = currentScene.getSpriteList().get(spriteIndex);
 
-			textView.setText(createActionBarTitle(currentProject,
-					currentScene,
-					currentSprite));
+			if(type != ScriptFinder.Type.SPRITE.getId()) {
+				textView.setText(createActionBarTitle(currentProject, currentScene, currentSprite,1));
+			}
+			else{
+				textView.setText(createActionBarTitle(currentProject, currentScene, currentSprite,2));
+			}
 
-			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(),
-					currentSprite.getName());
+			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(), currentSprite.getName());
 
 			if(type != ScriptFinder.Type.SCRIPT.getId()){
 				switch (type){
+					case 2:
+						ProjectManager.getInstance().setCurrentlyEditedScene(currentScene);
+						activity.onBackPressed();
+						break;
 					case 4:
 						SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,1);
+						ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(), currentSprite.getName());
 						break;
 					case 5:
 						SpriteActivityOnTabSelectedListenerKt.loadFragment(activity,2);
+						ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(), currentSprite.getName());
 						break;
 				}
 			}
-
-			adapter.updateItems(currentSprite);
-			adapter.notifyDataSetChanged();
-			listView.smoothScrollToPosition(brickIndex);
-			highlightBrickAtIndex(brickIndex);
-			hideKeyboard();
+			else{
+				adapter.updateItems(currentSprite);
+				adapter.notifyDataSetChanged();
+				listView.smoothScrollToPosition(brickIndex);
+				highlightBrickAtIndex(brickIndex);
+				hideKeyboard();
+			}
 		});
 
 		scriptFinder.setOnCloseListener(() -> {
@@ -352,7 +361,8 @@ public class ScriptFragment extends ListFragment implements
 		if (FinderDataManager.Companion.getInstance().getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
 			String sceneAndSpriteName =
 					createActionBarTitle(ProjectManager.getInstance().getCurrentProject(),
-							ProjectManager.getInstance().getStartScene(),ProjectManager.getInstance().getCurrentSprite());
+							ProjectManager.getInstance().getStartScene(),
+							ProjectManager.getInstance().getCurrentSprite(),1);
 			scriptFinder.onFragmentChanged(sceneAndSpriteName);
 			int indexSearch = FinderDataManager.Companion.getInstance().getSearchResultIndex();
 			int brickIndex = FinderDataManager.Companion.getInstance().getSearchResults().get(indexSearch)[2];
@@ -364,11 +374,17 @@ public class ScriptFragment extends ListFragment implements
 		return view;
 	}
 
-	public String createActionBarTitle(Project currentProject, Scene currentScene, Sprite currentSprite) {
-		if (currentProject.getSceneList().size() == 1) {
-			return currentSprite.getName();
-		} else {
-			return currentScene.getName() + ": " + currentSprite.getName();
+	public String createActionBarTitle(Project currentProject, Scene currentScene,
+			Sprite currentSprite, int flag) {
+		if(flag == 1) {
+			if (currentProject.getSceneList().size() == 1) {
+				return currentSprite.getName();
+			} else {
+				return currentScene.getName() + ": " + currentSprite.getName();
+			}
+		}
+		else{
+			return currentScene.getName();
 		}
 	}
 
