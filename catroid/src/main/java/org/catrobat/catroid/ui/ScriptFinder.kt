@@ -45,12 +45,14 @@ import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.content.bricks.Brick
 import org.catrobat.catroid.databinding.ViewScriptFinderBinding
 import org.catrobat.catroid.utils.ToastUtil
+import org.koin.java.KoinJavaComponent.bind
 import org.koin.java.KoinJavaComponent.inject
 import java.util.ArrayList
 import java.util.Locale
 
 class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     enum class Type(val id: Int){
+        SCENE(1),
         SPRITE(2),
         SCRIPT(3),
         LOOK(4),
@@ -152,6 +154,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
         if (query.isNotEmpty()) {
             if (FinderDataManager.instance.getSearchQuery() != query) {
                 FinderDataManager.instance.setSearchQuery(query)
+                binding.searchBar.setText(query)
                 fillIndices(query)
                 binding.find.visibility = GONE
                 binding.findNext.visibility = VISIBLE
@@ -194,8 +197,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
 
     fun onFragmentChanged(SceneAndSpriteName:String) {
-        open()
-        showNavigationButtons()
+        openForChangeFragment()
 
         binding.searchPositionIndicator.text = String.format(
             Locale.ROOT, "%d/%d", FinderDataManager.instance.getSearchResultIndex() + 1,
@@ -235,6 +237,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
 
     private fun startThreadToFillIndices(query: String, activeScene: Scene, activeSprite: Sprite?) {
         Thread {
+            val query = FinderDataManager.instance.getSearchQuery()
             val activity = context as Activity
             if (!activity.isFinishing) {
                 activity.runOnUiThread {
@@ -245,8 +248,13 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                 }
             }
             val scenes = projectManager.currentProject.sceneList
+
             for (i in scenes.indices) {
                 val scene = scenes[i]
+                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.SCENE){
+                    if (scene.name.toLowerCase(Locale.ROOT).contains(query))
+                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, i, i, Type.SCENE.id))
+                }
                 val spriteList = scene.spriteList
                 for (j in spriteList.indices) {
                     val sprite = spriteList[j]
@@ -263,7 +271,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                     for (order in FinderDataManager.instance.getSearchOrder()){
                         when (order) {
                             2 -> {
-                                    if (sprite.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery()))
+                                    if (sprite.name.toLowerCase(Locale.ROOT).contains(query))
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, j, Type.SPRITE.id))
                             }
                             3 -> {
@@ -278,7 +286,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                 val lookList = sprite.lookList
                                 for (k in lookList.indices) {
                                     val look = lookList[k]
-                                    if (look.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery())) {
+                                    if (look.name.toLowerCase(Locale.ROOT).contains(query)) {
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.LOOK.id))
                                     }
                                 }
@@ -287,7 +295,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                 val soundList = sprite.soundList
                                 for (k in soundList.indices) {
                                     val sound = soundList[k]
-                                    if (sound.name.toLowerCase(Locale.ROOT).contains(FinderDataManager.instance.getSearchQuery())) {
+                                    if (sound.name.toLowerCase(Locale.ROOT).contains(query)) {
                                         FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SOUND.id))
                                     }
                                 }
@@ -322,25 +330,36 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
     fun open() {
         this.visibility = VISIBLE
+        binding.searchBar.isFocusable
         val inputMethodManager =
             context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.toggleSoftInputFromWindow(
-            binding.searchBar.applicationWindowToken,
-            InputMethodManager.SHOW_FORCED, 0
-        )
+            inputMethodManager.toggleSoftInputFromWindow(
+                binding.searchBar.applicationWindowToken,
+                InputMethodManager.SHOW_FORCED, 0
+            )
+            onOpenListener?.onOpen()
+            binding.searchBar.requestFocus()
+    }
+
+    fun openForChangeFragment(){
+        this.visibility = VISIBLE
+        showNavigationButtons()
         onOpenListener?.onOpen()
-        binding.searchBar.requestFocus()
+        binding.searchBar.setText(FinderDataManager.instance.getSearchQuery())
+        binding.searchBar.isFocusableInTouchMode = false
     }
 
     fun close() {
         this.visibility = GONE
         FinderDataManager.instance.clearSearchResults()
-
-        binding.searchBar.setText("")
+        binding.searchBar.text.clear()
+        binding.searchBar.isFocusableInTouchMode = true
         FinderDataManager.instance.setSearchQuery("")
-        onCloseListener?.onClose()
-        this.hideKeyboard()
         FinderDataManager.instance.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.NONE)
+        FinderDataManager.instance.type = -1
+        onCloseListener?.onClose()
+        hideNavigationButtons()
+        this.hideKeyboard()
     }
 
     val isClosed: Boolean

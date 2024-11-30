@@ -47,7 +47,6 @@ import org.catrobat.catroid.ui.FinderDataManager.Companion.instance
 import org.catrobat.catroid.ui.ScriptFinder
 import org.catrobat.catroid.ui.SpriteActivity
 import org.catrobat.catroid.ui.UiUtils
-import org.catrobat.catroid.ui.addTabLayout
 import org.catrobat.catroid.ui.controller.BackpackListManager
 import org.catrobat.catroid.ui.loadFragment
 import org.catrobat.catroid.ui.recyclerview.adapter.SoundAdapter
@@ -92,7 +91,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
 
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
-
+                instance.type = type
                 if(type == ScriptFinder.Type.SPRITE.id) {
                     textView?.text = createActionBarTitle(2)
                 }
@@ -101,32 +100,27 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                     textView?.text = createActionBarTitle(1)
                 }
 
-                if (type != ScriptFinder.Type.SOUND.id) {
-                    when (type) {
-                        2 -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            activity.onBackPressed()
-                        }
-                        3 -> {
-                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
-                            activity.loadFragment(0)
-                        }
-                        4 -> {
-                            ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
-                            activity.loadFragment(1)
-                        }
+                when (type) {
+                    1 -> {
+                        activity.onBackPressed()
                     }
-                }
-                else{
-                    val indexSearch = instance.getSearchResultIndex()
-                    val value = instance.getSearchResults()?.get(indexSearch)?.get(2)
-                    if (value != null) {
-                        scriptfinder.showNavigationButtons()
-                        recyclerView.scrollToPosition(value)
+                    2 -> {
+                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                        activity.onBackPressed()
                     }
-                    initializeAdapter()
-                    adapter.notifyDataSetChanged()
-                    hideKeyboard()
+                    3 -> {
+                        ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                        activity.loadFragment(0)
+                    }
+                    4 -> {
+                        ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                        activity.loadFragment(1)
+                    }
+                    5 -> {
+                        ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
+                        activity.loadFragment(2)
+
+                    }
                 }
             }
         })
@@ -147,11 +141,17 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
 
         scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
             override fun onOpen() {
-                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
-                val order = arrayOf(5,3,4)
-                instance.setSearchOrder(order)
-                activity.removeTabs()
-                activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
+                if (instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.NONE){
+                    scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
+                    val order = arrayOf(5,3,4)
+                    instance.setSearchOrder(order)
+                    activity.removeTabs()
+                    activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
+                    }
+                else{
+                    activity.removeTabs()
+                    activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
+                }
                 }
         })
 
@@ -173,10 +173,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         emptyView.setText(R.string.fragment_sound_text_description)
         onAdapterReady()
     }
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
-    }
+
     fun createActionBarTitle(flag: Int): String {
         if(flag == 1) {
             return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {

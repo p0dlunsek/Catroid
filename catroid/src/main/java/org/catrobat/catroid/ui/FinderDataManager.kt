@@ -33,6 +33,7 @@ class FinderDataManager {
     }
     enum class InitiatingFragmentEnum(val id: Int){
         NONE(0),
+        SCENE(1),
         SPRITE(2),
         SCRIPT(3),
         LOOK(4),
@@ -44,6 +45,7 @@ class FinderDataManager {
     private var searchResultIndex = -1
     private var searchQuery = ""
     private var searchOrder = arrayOf(-1, -1)
+    var type = -1
 
     fun getSearchOrder(): Array<Int>{
         return searchOrder

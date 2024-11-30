@@ -303,6 +303,7 @@ public class ScriptFragment extends ListFragment implements
 			Project currentProject = ProjectManager.getInstance().getCurrentProject();
 			Scene currentScene = currentProject.getSceneList().get(sceneIndex);
 			Sprite currentSprite = currentScene.getSpriteList().get(spriteIndex);
+			FinderDataManager.Companion.getInstance().setType(type);
 
 			if(type != ScriptFinder.Type.SPRITE.getId()) {
 				textView.setText(createActionBarTitle(currentProject, currentScene, currentSprite,1));
@@ -315,6 +316,8 @@ public class ScriptFragment extends ListFragment implements
 
 			if(type != ScriptFinder.Type.SCRIPT.getId()){
 				switch (type){
+					case 1:
+						activity.onBackPressed();
 					case 2:
 						ProjectManager.getInstance().setCurrentlyEditedScene(currentScene);
 						activity.onBackPressed();
