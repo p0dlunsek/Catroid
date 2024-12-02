@@ -63,7 +63,6 @@ fun Activity?.removeTabLayout() {
         val viewGroup = findViewById<ViewGroup>(R.id.activity_sprite)
         viewGroup?.removeView(tabLayout)
     }
-
 }
 
 @SuppressLint("InflateParams")

@@ -45,7 +45,6 @@ import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.content.bricks.Brick
 import org.catrobat.catroid.databinding.ViewScriptFinderBinding
 import org.catrobat.catroid.utils.ToastUtil
-import org.koin.java.KoinJavaComponent.bind
 import org.koin.java.KoinJavaComponent.inject
 import java.util.ArrayList
 import java.util.Locale
@@ -96,7 +95,8 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) =
                 Unit
 
-            override fun onTextChanged(newText: CharSequence, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(newText: CharSequence, start: Int, before: Int, count:
+            Int) {
                 if (FinderDataManager.instance.getSearchQuery() == formatSearchQuery(newText)) {
                     showNavigationButtons()
                 } else {
@@ -237,7 +237,6 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
 
     private fun startThreadToFillIndices(query: String, activeScene: Scene, activeSprite: Sprite?) {
         Thread {
-            val query = FinderDataManager.instance.getSearchQuery()
             val activity = context as Activity
             if (!activity.isFinishing) {
                 activity.runOnUiThread {
@@ -331,9 +330,8 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     fun open() {
         this.visibility = VISIBLE
         binding.searchBar.isFocusable
-        val inputMethodManager =
-            context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            inputMethodManager.toggleSoftInputFromWindow(
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.toggleSoftInputFromWindow(
                 binding.searchBar.applicationWindowToken,
                 InputMethodManager.SHOW_FORCED, 0
             )
@@ -354,9 +352,10 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
         FinderDataManager.instance.clearSearchResults()
         binding.searchBar.text.clear()
         binding.searchBar.isFocusableInTouchMode = true
-        FinderDataManager.instance.setSearchQuery("")
+        FinderDataManager.instance.setSearchQuery(null)
         FinderDataManager.instance.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.NONE)
         FinderDataManager.instance.type = -1
+        FinderDataManager.instance.currentMatchIndex = -1
         onCloseListener?.onClose()
         hideNavigationButtons()
         this.hideKeyboard()

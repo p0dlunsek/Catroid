@@ -92,6 +92,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
                 instance.type = type
+                instance.currentMatchIndex = brickIndex
                 if(type == ScriptFinder.Type.SPRITE.id) {
                     textView?.text = createActionBarTitle(2)
                 }
@@ -122,6 +123,8 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
 
                     }
                 }
+                hideKeyboard()
+
             }
         })
         scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
@@ -145,13 +148,9 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                     scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
                     val order = arrayOf(5,3,4)
                     instance.setSearchOrder(order)
-                    activity.removeTabs()
-                    activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
                     }
-                else{
-                    activity.removeTabs()
-                    activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
-                }
+                activity.removeTabs()
+                activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
                 }
         })
 
@@ -165,6 +164,14 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
             }
         }
         return parentView
+    }
+
+    private fun highlightBrick(index:Int) {
+
+    }
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
     override fun initializeAdapter() {
         sharedPreferenceDetailsKey = SharedPreferenceKeys.SHOW_DETAILS_SOUNDS_PREFERENCE_KEY

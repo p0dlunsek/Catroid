@@ -22,12 +22,14 @@
  */
 package org.catrobat.catroid.ui.recyclerview.adapter
 
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.text.format.DateUtils
 import android.util.Log
 import org.catrobat.catroid.R
 import org.catrobat.catroid.common.SoundInfo
+import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.recyclerview.viewholder.ExtendedViewHolder
 import org.catrobat.catroid.utils.FileMetaDataExtractor
 import java.io.IOException
@@ -46,7 +48,8 @@ class SoundAdapter(items: List<SoundInfo?>?) : ExtendedRVAdapter<SoundInfo?>(ite
 
         holder?.title?.text = item?.name
         holder?.image?.setImageResource(R.drawable.ic_media_play_dark)
-
+        //if (position == FinderDataManager.instance.currentMatchIndex)
+            //holder?.itemView?.setBackgroundColor(Color.parseColor("#1C5B70"))
         holder?.image?.setOnClickListener {
             if (mediaPlayer.isPlaying) {
                 holder.image.setImageResource(R.drawable.ic_media_play_dark)

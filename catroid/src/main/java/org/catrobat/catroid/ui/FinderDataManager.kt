@@ -43,8 +43,9 @@ class FinderDataManager {
     private var initiatingFragment: InitiatingFragmentEnum = InitiatingFragmentEnum.NONE
     private var searchResults: MutableList<Array<Int>>? = null
     private var searchResultIndex = -1
-    private var searchQuery = ""
+    private var searchQuery: String? = null
     private var searchOrder = arrayOf(-1, -1)
+    var currentMatchIndex = -1
     var type = -1
 
     fun getSearchOrder(): Array<Int>{
@@ -54,11 +55,11 @@ class FinderDataManager {
     fun setSearchOrder(order: Array<Int>){
         searchOrder = order
     }
-    fun setSearchQuery(searchquery: String){
+    fun setSearchQuery(searchquery: String?){
         searchQuery = searchquery
     }
 
-    fun getSearchQuery(): String{
+    fun getSearchQuery(): String? {
         return searchQuery
     }
     fun setSearchResultIndex(searchresultIndex:Int){

@@ -123,6 +123,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
                         activity.loadFragment(2)
                     }
                 }
+                hideKeyboard()
             }
         })
         scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
@@ -142,9 +143,11 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
 
         scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
             override fun onOpen() {
-                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.LOOK)
-                val order = arrayOf(4,5,3)
-                FinderDataManager.instance.setSearchOrder(order)
+                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.NONE){
+                    scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.LOOK)
+                    val order = arrayOf(4,5,3)
+                    FinderDataManager.instance.setSearchOrder(order)
+                }
                 activity.removeTabs()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
             }
@@ -309,7 +312,10 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
             }
         }
     }
-
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+    }
     fun undo(): Boolean {
         currentItem?.let {
             try {
@@ -385,4 +391,6 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         popupMenu.menu.findItem(R.id.backpack).setTitle(R.string.pack)
         popupMenu.show()
     }
+
+
 }
