@@ -25,6 +25,7 @@ package org.catrobat.catroid.ui.recyclerview.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ import org.catrobat.catroid.R;
 import org.catrobat.catroid.content.GroupItemSprite;
 import org.catrobat.catroid.content.GroupSprite;
 import org.catrobat.catroid.content.Sprite;
+import org.catrobat.catroid.ui.FinderDataManager;
 import org.catrobat.catroid.ui.recyclerview.viewholder.CheckableViewHolder;
 import org.catrobat.catroid.ui.recyclerview.viewholder.ExtendedViewHolder;
 
@@ -125,6 +127,7 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 			lookData = item.getLookList().get(0).getThumbnailBitmap();
 		}
 		holder.image.setImageBitmap(lookData);
+
 
 		if (showDetails) {
 			holder.details.setText(String.format(Locale.getDefault(),

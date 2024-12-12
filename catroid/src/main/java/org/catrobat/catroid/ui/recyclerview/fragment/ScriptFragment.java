@@ -313,6 +313,7 @@ public class ScriptFragment extends ListFragment implements
 			}
 
 			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(), currentSprite.getName());
+			FinderDataManager.Companion.getInstance().setCurrentMatchIndex(brickIndex);
 
 			if(type != ScriptFinder.Type.SCRIPT.getId()){
 				switch (type){

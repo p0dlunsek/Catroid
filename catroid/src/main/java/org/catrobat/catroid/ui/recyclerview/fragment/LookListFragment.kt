@@ -102,6 +102,9 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
                     currentSprite = currentScene.spriteList[spriteIndex]
                     textView?.text = createActionBarTitle(1)
                 }
+                FinderDataManager.instance.currentMatchIndex = brickIndex
+
+
                 when (type) {
                     1 -> {
                         activity.onBackPressed()

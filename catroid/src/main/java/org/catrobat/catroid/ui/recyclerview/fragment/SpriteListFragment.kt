@@ -185,6 +185,9 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                     currentSprite = currentScene.spriteList[spriteIndex]
                 }
                 if (type != ScriptFinder.Type.SPRITE.id) {
+
+                    FinderDataManager.instance.currentMatchIndex = brickIndex
+
                     when (type) {
                         ScriptFinder.Type.SCENE.id -> {
                             activity.onBackPressed()

@@ -22,9 +22,11 @@
  */
 package org.catrobat.catroid.ui.recyclerview.adapter
 
+import android.graphics.Color
 import android.view.View
 import org.catrobat.catroid.R
 import org.catrobat.catroid.common.LookData
+import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.recyclerview.viewholder.ExtendedViewHolder
 import org.catrobat.catroid.utils.FileMetaDataExtractor
 import java.util.Locale
@@ -34,6 +36,11 @@ class LookAdapter(items: List<LookData?>?) : ExtendedRVAdapter<LookData?>(items)
         val item = items[position]
         holder.title.text = item?.name
         holder.image.setImageBitmap(item?.thumbnailBitmap)
+        if (position == FinderDataManager.instance.currentMatchIndex)
+            holder.itemView.setBackgroundColor(Color.parseColor("#165C72"))
+        else {
+            holder.itemView.setBackgroundColor(Color.parseColor("#00475E"))
+        }
         if (showDetails) {
             val measure = item?.measure
             val measureString = measure?.get(0).toString() + " x " + measure?.get(1)

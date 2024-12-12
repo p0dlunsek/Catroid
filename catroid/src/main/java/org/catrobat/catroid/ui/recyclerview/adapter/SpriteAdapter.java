@@ -26,10 +26,13 @@ package org.catrobat.catroid.ui.recyclerview.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
+import android.graphics.Color;
 
 import org.catrobat.catroid.R;
 import org.catrobat.catroid.content.Sprite;
+import org.catrobat.catroid.ui.FinderDataManager;
 import org.catrobat.catroid.ui.recyclerview.viewholder.ExtendedViewHolder;
+
 
 import java.util.List;
 import java.util.Locale;

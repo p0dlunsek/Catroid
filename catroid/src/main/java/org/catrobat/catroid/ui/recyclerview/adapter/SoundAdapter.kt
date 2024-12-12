@@ -48,8 +48,11 @@ class SoundAdapter(items: List<SoundInfo?>?) : ExtendedRVAdapter<SoundInfo?>(ite
 
         holder?.title?.text = item?.name
         holder?.image?.setImageResource(R.drawable.ic_media_play_dark)
-        //if (position == FinderDataManager.instance.currentMatchIndex)
-            //holder?.itemView?.setBackgroundColor(Color.parseColor("#1C5B70"))
+        if (position == FinderDataManager.instance.currentMatchIndex)
+            holder?.itemView?.setBackgroundColor(Color.parseColor("#165C72"))
+        else {
+            holder?.itemView?.setBackgroundColor(Color.parseColor("#00475E"))
+        }
         holder?.image?.setOnClickListener {
             if (mediaPlayer.isPlaying) {
                 holder.image.setImageResource(R.drawable.ic_media_play_dark)

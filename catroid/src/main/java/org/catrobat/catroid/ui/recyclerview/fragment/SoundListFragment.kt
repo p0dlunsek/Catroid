@@ -92,7 +92,6 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
                 instance.type = type
-                instance.currentMatchIndex = brickIndex
                 if(type == ScriptFinder.Type.SPRITE.id) {
                     textView?.text = createActionBarTitle(2)
                 }
@@ -100,7 +99,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                     currentSprite = currentScene.spriteList[spriteIndex]
                     textView?.text = createActionBarTitle(1)
                 }
-
+                instance.currentMatchIndex = brickIndex
                 when (type) {
                     1 -> {
                         activity.onBackPressed()
@@ -120,7 +119,6 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                     5 -> {
                         ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.name, currentSprite.name)
                         activity.loadFragment(2)
-
                     }
                 }
                 hideKeyboard()
