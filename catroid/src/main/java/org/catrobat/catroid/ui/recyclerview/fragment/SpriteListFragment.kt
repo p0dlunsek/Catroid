@@ -177,61 +177,55 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
 
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
+                currentSprite = currentScene.spriteList[spriteIndex]
 
-                if(type == ScriptFinder.Type.SPRITE.id) {
-                    textView?.text = createActionBarTitle()
-                }
-                else{
-                    currentSprite = currentScene.spriteList[spriteIndex]
-                }
-                if (type != ScriptFinder.Type.SPRITE.id) {
+                FinderDataManager.instance.currentMatchIndex = brickIndex
 
-                    FinderDataManager.instance.currentMatchIndex = brickIndex
-
-                    when (type) {
-                        ScriptFinder.Type.SCENE.id -> {
-                            activity.onBackPressed()
-                        }
-                        ScriptFinder.Type.SCRIPT.id -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentSprite
-                            val intent = Intent(requireContext(), SpriteActivity::class.java)
-                            intent.putExtra(
-                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                                SpriteActivity.FRAGMENT_SCRIPTS
-                            )
-                            startActivity(intent)
-                        }
-                        ScriptFinder.Type.LOOK.id -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentSprite
-                            val intent = Intent(requireContext(), SpriteActivity::class.java)
-                            intent.putExtra(
-                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                                SpriteActivity.FRAGMENT_LOOKS
-                            )
-                            startActivity(intent)
-                        }
-                        ScriptFinder.Type.SOUND.id -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentSprite
-                            val intent = Intent(requireContext(), SpriteActivity::class.java)
-                            intent.putExtra(
-                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                                SpriteActivity.FRAGMENT_SOUNDS
-                            )
-                            startActivity(intent)
+                when (type) {
+                    ScriptFinder.Type.SPRITE.id -> {
+                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                        textView?.text = createActionBarTitle()
+                        initializeAdapter()
+                        adapter.notifyDataSetChanged()
+                        val indexSearch = FinderDataManager.instance.getSearchResultIndex()
+                        val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
+                        if (value != null) {
+                            scriptfinder.showNavigationButtons()
+                            recyclerView.scrollToPosition(value)
                         }
                     }
-                }
-                else{
-                    initializeAdapter()
-                    adapter.notifyDataSetChanged()
-                    val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-                    val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-                    if (value != null) {
-                        scriptfinder.showNavigationButtons()
-                        recyclerView.scrollToPosition(value)
+                    ScriptFinder.Type.SCENE.id -> {
+                        activity.onBackPressed()
+                    }
+                    ScriptFinder.Type.SCRIPT.id -> {
+                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                        projectManager.currentSprite = currentSprite
+                        val intent = Intent(requireContext(), SpriteActivity::class.java)
+                        intent.putExtra(
+                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                            SpriteActivity.FRAGMENT_SCRIPTS
+                        )
+                        startActivity(intent)
+                    }
+                    ScriptFinder.Type.LOOK.id -> {
+                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                        projectManager.currentSprite = currentSprite
+                        val intent = Intent(requireContext(), SpriteActivity::class.java)
+                        intent.putExtra(
+                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                            SpriteActivity.FRAGMENT_LOOKS
+                        )
+                        startActivity(intent)
+                    }
+                    ScriptFinder.Type.SOUND.id -> {
+                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
+                        projectManager.currentSprite = currentSprite
+                        val intent = Intent(requireContext(), SpriteActivity::class.java)
+                        intent.putExtra(
+                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
+                            SpriteActivity.FRAGMENT_SOUNDS
+                        )
+                        startActivity(intent)
                     }
                 }
                 hideKeyboard()
