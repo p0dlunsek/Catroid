@@ -97,9 +97,11 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 else {
                     //currentSprite = currentScene.spriteList[spriteIndex]
                 }
+                FinderDataManager.instance.currentMatchIndex = brickIndex
 
 
                 if (type != ScriptFinder.Type.SCENE.id) {
+
 
                     when (type) {
 

@@ -234,6 +234,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
 
         scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
             override fun onClose() {
+                finishActionMode()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
             }
         })

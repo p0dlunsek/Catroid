@@ -110,6 +110,15 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 		if (holder.getItemViewType() == BACKGROUND) {
 			holder.itemView.setOnLongClickListener(null);
 			holder.checkBox.setVisibility(GONE);
+			if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
+				View view_background_button =
+						holder.itemView.findViewById(R.id.view_holder_background);
+				view_background_button.setBackgroundColor(Color.parseColor("#165C72"));
+			}
+			else{
+				View view_background_button = holder.itemView.findViewById(R.id.view_holder_background);
+				view_background_button.setBackgroundColor(Color.parseColor("#00475E"));
+			}
 		}
 
 		if (holder.getItemViewType() == SPRITE_GROUP_ITEM) {
