@@ -97,6 +97,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 else {
                     //currentSprite = currentScene.spriteList[spriteIndex]
                 }
+
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
 
