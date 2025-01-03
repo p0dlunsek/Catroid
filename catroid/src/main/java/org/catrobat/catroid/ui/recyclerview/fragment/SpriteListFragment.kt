@@ -124,11 +124,18 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     override fun onResume() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
         initializeAdapter()
+
         val activity = getActivity() as ProjectActivity
         super.onResume()
         SnackbarUtil.showHintSnackbar(requireActivity(), R.string.hint_objects)
 
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+
+            val searchIndex = FinderDataManager.instance.getSearchResultIndex()
+            val spriteIndex = FinderDataManager.instance.getSearchResults()?.get(searchIndex)?.get(1)
+            projectManager.currentSprite = currentScene.spriteList[spriteIndex!!]
+
+
             when(FinderDataManager.instance.type){
 
                 ScriptFinder.Type.SCENE.id -> {
@@ -139,7 +146,11 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                     val intent = Intent(requireContext(), SpriteActivity::class.java)
                     intent.putExtra(
                         SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                        SpriteActivity.FRAGMENT_SOUNDS
+                        when (FinderDataManager.instance.type) {
+                            ScriptFinder.Type.SOUND.id -> SpriteActivity.FRAGMENT_SOUNDS
+                            ScriptFinder.Type.LOOK.id -> SpriteActivity.FRAGMENT_LOOKS
+                            else -> SpriteActivity.FRAGMENT_SCRIPTS
+                        }
                     )
                     startActivity(intent)
                 }
@@ -176,14 +187,14 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             )   {
 
                 currentProject = ProjectManager.getInstance().currentProject
-                currentScene = currentProject.sceneList[sceneIndex]
-                currentSprite = currentScene.spriteList[spriteIndex]
+                ProjectManager.getInstance().setCurrentlyEditedScene(currentProject.sceneList[sceneIndex])
+                projectManager.currentSprite = currentProject.sceneList[sceneIndex].spriteList[spriteIndex]
+
 
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
                 when (type) {
                     ScriptFinder.Type.SPRITE.id -> {
-                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
                         textView?.text = createActionBarTitle()
                         initializeAdapter()
                         adapter.notifyDataSetChanged()
@@ -198,8 +209,6 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                         activity.onBackPressed()
                     }
                     ScriptFinder.Type.SCRIPT.id -> {
-                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                        projectManager.currentSprite = currentSprite
                         val intent = Intent(requireContext(), SpriteActivity::class.java)
                         intent.putExtra(
                             SpriteActivity.EXTRA_FRAGMENT_POSITION,
@@ -208,8 +217,6 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                         startActivity(intent)
                     }
                     ScriptFinder.Type.LOOK.id -> {
-                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                        projectManager.currentSprite = currentSprite
                         val intent = Intent(requireContext(), SpriteActivity::class.java)
                         intent.putExtra(
                             SpriteActivity.EXTRA_FRAGMENT_POSITION,
@@ -218,8 +225,6 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                         startActivity(intent)
                     }
                     ScriptFinder.Type.SOUND.id -> {
-                        ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                        projectManager.currentSprite = currentSprite
                         val intent = Intent(requireContext(), SpriteActivity::class.java)
                         intent.putExtra(
                             SpriteActivity.EXTRA_FRAGMENT_POSITION,

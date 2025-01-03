@@ -86,7 +86,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 textView: TextView?
             ) {
 
-                currentProject = ProjectManager.getInstance().currentProject
+                //currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
                 FinderDataManager.instance.type = type
 
@@ -100,41 +100,10 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
 
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
-
                 if (type != ScriptFinder.Type.SCENE.id) {
 
+                    onItemClick(currentScene,MultiSelectionManager())
 
-                    when (type) {
-
-                        ScriptFinder.Type.SPRITE.id -> {
-                            onItemClick(currentScene,MultiSelectionManager())
-                        }
-                        ScriptFinder.Type.SCRIPT.id -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentScene.spriteList[spriteIndex]
-                            val intent = Intent(requireContext(), SpriteActivity::class.java)
-                            intent.putExtra(
-                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                                SpriteActivity.FRAGMENT_SCRIPTS
-                            )
-                            startActivity(intent)
-                        }
-                        ScriptFinder.Type.LOOK.id -> {
-                            ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentScene.spriteList[spriteIndex]
-                            val intent = Intent(requireContext(), SpriteActivity::class.java)
-                            intent.putExtra(
-                                SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                                SpriteActivity.FRAGMENT_LOOKS
-                            )
-                            startActivity(intent)
-                        }
-                        ScriptFinder.Type.SOUND.id -> {
-                            onItemClick(currentScene,MultiSelectionManager())
-                            //ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
-                            projectManager.currentSprite = currentScene.spriteList[spriteIndex]
-                        }
-                    }
                 } else {
                     initializeAdapter()
                     adapter.notifyDataSetChanged()
@@ -152,6 +121,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
         scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
             override fun onClose() {
                 activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
+                finishActionMode()
             }
         })
 

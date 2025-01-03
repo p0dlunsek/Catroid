@@ -111,13 +111,13 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 			holder.itemView.setOnLongClickListener(null);
 			holder.checkBox.setVisibility(GONE);
 			if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
-				View view_background_button =
-						holder.itemView.findViewById(R.id.view_holder_background);
+				View view_background_button = holder.itemView.findViewById(R.id.view_holder_background);
 				view_background_button.setBackgroundColor(Color.parseColor("#165C72"));
 			}
 			else{
-				View view_background_button = holder.itemView.findViewById(R.id.view_holder_background);
-				view_background_button.setBackgroundColor(Color.parseColor("#00475E"));
+				holder.itemView.setBackgroundColor(Color.parseColor("#00475E"));
+				View list_headline_sprites = holder.itemView.findViewById(R.id.list_headline_sprites);
+				list_headline_sprites.setBackgroundColor(Color.parseColor("#04222C"));
 			}
 		}
 
@@ -128,6 +128,15 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 			if (((GroupItemSprite) item).isCollapsed()) {
 				params.height = 0;
 				holder.itemView.setLayoutParams(params);
+			}
+		}
+
+		else{
+			if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
+				holder.itemView.setBackgroundColor(Color.parseColor("#165C72"));
+			}
+			else{
+				holder.itemView.setBackgroundColor(Color.parseColor("#00475E"));
 			}
 		}
 
