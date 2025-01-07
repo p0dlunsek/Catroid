@@ -29,7 +29,7 @@
 
     <include layout="@layout/progress_bar" />
 
-    <org.catrobat.catroid.ui.ScriptFinder
+    <org.catrobat.catroid.ui.Finder
         android:id="@+id/findview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

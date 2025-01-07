@@ -39,7 +39,7 @@ import org.catrobat.catroid.R;
 import org.catrobat.catroid.common.Nameable;
 import org.catrobat.catroid.merge.NewProjectNameTextWatcher;
 import org.catrobat.catroid.ui.BottomBar;
-import org.catrobat.catroid.ui.ScriptFinder;
+import org.catrobat.catroid.ui.Finder;
 import org.catrobat.catroid.ui.SpriteActivity;
 import org.catrobat.catroid.ui.controller.BackpackListManager;
 import org.catrobat.catroid.ui.recyclerview.adapter.ExtendedRVAdapter;
@@ -91,7 +91,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 
 	protected View parentView;
 	protected RecyclerView recyclerView;
-	protected ScriptFinder scriptfinder;
+	protected Finder finder;
 	protected SpriteActivity activity;
 
 	protected TextView emptyView;
@@ -245,7 +245,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		parentView = inflater.inflate(R.layout.fragment_list_view, container, false);
-		scriptfinder = parentView.findViewById(R.id.findview);
+		finder = parentView.findViewById(R.id.findview);
 		recyclerView = parentView.findViewById(R.id.recycler_view);
 		emptyView = parentView.findViewById(R.id.empty_view);
 		setShowProgressBar(true);
@@ -344,7 +344,7 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 				startActionMode(MERGE);
 				break;
 			case R.id.find:
-				scriptfinder.open();
+				finder.open();
 				break;
 			case R.id.show_details:
 				adapter.showDetails = !adapter.showDetails;

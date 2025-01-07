@@ -49,14 +49,7 @@ import org.koin.java.KoinJavaComponent.inject
 import java.util.ArrayList
 import java.util.Locale
 
-class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
-    enum class Type(val id: Int){
-        SCENE(1),
-        SPRITE(2),
-        SCRIPT(3),
-        LOOK(4),
-        SOUND(5)
-    }
+class Finder(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
     private var onResultFoundListener: OnResultFoundListener? = null
     private var onCloseListener: OnCloseListener? = null
@@ -117,7 +110,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     }
 
     companion object {
-        val TAG = ScriptFinder::class.java.simpleName
+        val TAG = Finder::class.java.simpleName
 
         @Suppress("ComplexMethod", "TooGenericExceptionCaught")
         fun searchBrickViews(v: View?, searchQuery: String): Boolean {
@@ -250,9 +243,10 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
 
             for (i in scenes.indices) {
                 val scene = scenes[i]
-                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.SCENE){
+                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.FragmentType
+                    .SCENE){
                     if (scene.name.toLowerCase(Locale.ROOT).contains(query))
-                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, i, i, Type.SCENE.id))
+                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, i, i, FinderDataManager.FragmentType.SCENE.id))
                 }
                 val spriteList = scene.spriteList
                 for (j in spriteList.indices) {
@@ -271,13 +265,13 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                         when (order) {
                             2 -> {
                                     if (sprite.name.toLowerCase(Locale.ROOT).contains(query))
-                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, j, Type.SPRITE.id))
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, j, FinderDataManager.FragmentType.SPRITE.id))
                             }
                             3 -> {
                                 for (k in bricks.indices) {
                                     val brick = bricks[k]
                                     if (searchBrickViews(brick.getView(context), query)) {
-                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SCRIPT.id))
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, FinderDataManager.FragmentType.SCRIPT.id))
                                     }
                                 }
                             }
@@ -286,7 +280,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                 for (k in lookList.indices) {
                                     val look = lookList[k]
                                     if (look.name.toLowerCase(Locale.ROOT).contains(query)) {
-                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.LOOK.id))
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, FinderDataManager.FragmentType.LOOK.id))
                                     }
                                 }
                             }
@@ -295,7 +289,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
                                 for (k in soundList.indices) {
                                     val sound = soundList[k]
                                     if (sound.name.toLowerCase(Locale.ROOT).contains(query)) {
-                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, Type.SOUND.id))
+                                        FinderDataManager.instance.addtoSearchResults(arrayOf(i, j, k, FinderDataManager.FragmentType.SOUND.id))
                                     }
                                 }
                             }
@@ -324,7 +318,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
     val isOpen: Boolean
         get() = visibility == VISIBLE
 
-    fun setInitiatingFragment(fragmentEnum: FinderDataManager.InitiatingFragmentEnum){
+    fun setInitiatingFragment(fragmentEnum: FinderDataManager.FragmentType){
         FinderDataManager.instance.setInitiatingFragment(fragmentEnum)
     }
     fun open() {
@@ -353,7 +347,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
         binding.searchBar.text.clear()
         binding.searchBar.isFocusableInTouchMode = true
         FinderDataManager.instance.setSearchQuery(null)
-        FinderDataManager.instance.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.NONE)
+        FinderDataManager.instance.setInitiatingFragment(FinderDataManager.FragmentType.NONE)
         FinderDataManager.instance.type = -1
         FinderDataManager.instance.currentMatchIndex = -1
         onCloseListener?.onClose()

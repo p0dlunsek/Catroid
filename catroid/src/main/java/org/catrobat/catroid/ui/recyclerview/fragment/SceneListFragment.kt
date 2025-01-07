@@ -47,7 +47,7 @@ import org.catrobat.catroid.io.asynctask.ProjectLoader.ProjectLoadListener
 import org.catrobat.catroid.io.asynctask.loadProject
 import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.ProjectActivity
-import org.catrobat.catroid.ui.ScriptFinder
+import org.catrobat.catroid.ui.Finder
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.controller.BackpackListManager
 import org.catrobat.catroid.ui.recyclerview.adapter.SceneAdapter
@@ -74,7 +74,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
         currentProject = ProjectManager.getInstance().currentProject
         currentScene = ProjectManager.getInstance().currentlyEditedScene
 
-        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+        finder?.setOnResultFoundListener(object : Finder.OnResultFoundListener {
             override fun onResultFound(
                 sceneIndex: Int,
                 spriteIndex: Int,
@@ -86,19 +86,12 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
 
                 currentScene = currentProject.sceneList[sceneIndex]
                 FinderDataManager.instance.type = type
-
-
-                if (type == ScriptFinder.Type.SCENE.id) {
-                    textView?.text = createActionBarTitle()
-                }
-
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
-                if (type != ScriptFinder.Type.SCENE.id) {
-
+                if (type != FinderDataManager.FragmentType.SCENE.id) {
                     onItemClick(currentScene,MultiSelectionManager())
-
                 } else {
+                    textView?.text = createActionBarTitle()
                     initializeAdapter()
                     adapter.notifyDataSetChanged()
                     scrollToSearchResult()
@@ -106,17 +99,17 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 hideKeyboard()
             }
         })
-        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+        finder?.setOnCloseListener(object : Finder.OnCloseListener {
             override fun onClose() {
                 activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
                 finishActionMode()
             }
         })
 
-        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+        finder?.setOnOpenListener(object : Finder.OnOpenListener {
             override fun onOpen() {
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
-                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SCENE)
+                finder.setInitiatingFragment(FinderDataManager.FragmentType.SCENE)
                 val order = arrayOf(2, 3, 4, 5)
                 FinderDataManager.instance.setSearchOrder(order)
             }
@@ -142,14 +135,14 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
         projectManager.currentlyEditedScene = currentProject.defaultScene
         (requireActivity() as AppCompatActivity).supportActionBar?.title = currentProject.name
 
-        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
             val sceneAndSpriteName = createActionBarTitle()
-            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            finder.onFragmentChanged(sceneAndSpriteName)
             scrollToSearchResult()
             hideKeyboard()
         }
         else{
-            scriptfinder.close()
+            finder.close()
         }
     }
     private fun switchToSpriteListFragment() {

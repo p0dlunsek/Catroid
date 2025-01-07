@@ -44,7 +44,7 @@ import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.pocketmusic.PocketMusicActivity
 import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.FinderDataManager.Companion.instance
-import org.catrobat.catroid.ui.ScriptFinder
+import org.catrobat.catroid.ui.Finder
 import org.catrobat.catroid.ui.SpriteActivity
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.controller.BackpackListManager
@@ -79,7 +79,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
         currentSprite = ProjectManager.getInstance().currentSprite
 
-        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+        finder?.setOnResultFoundListener(object : Finder.OnResultFoundListener {
             override fun onResultFound(
                 sceneIndex: Int,
                 spriteIndex: Int,
@@ -92,7 +92,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                 currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
                 instance.type = type
-                if(type == ScriptFinder.Type.SPRITE.id) {
+                if(type == FinderDataManager.FragmentType.SPRITE.id) {
                     textView?.text = createActionBarTitle(2)
                 }
                 else{
@@ -125,7 +125,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
 
             }
         })
-        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+        finder?.setOnCloseListener(object : Finder.OnCloseListener {
             override fun onClose() {
                 finishActionMode()
                 if (!activity.isFinishing) {
@@ -140,10 +140,10 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                 }
         })
 
-        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+        finder?.setOnOpenListener(object : Finder.OnOpenListener {
             override fun onOpen() {
-                if (instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.NONE){
-                    scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SOUND)
+                if (instance.getInitiatingFragment() == FinderDataManager.FragmentType.NONE){
+                    finder.setInitiatingFragment(FinderDataManager.FragmentType.SOUND)
                     val order = arrayOf(5,3,4)
                     instance.setSearchOrder(order)
                     }
@@ -152,9 +152,9 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
                 }
         })
 
-        if (instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+        if (instance.getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
             val sceneAndSpriteName = createActionBarTitle(1)
-            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            finder.onFragmentChanged(sceneAndSpriteName)
             scrollToSearchResult()
         }
         return parentView

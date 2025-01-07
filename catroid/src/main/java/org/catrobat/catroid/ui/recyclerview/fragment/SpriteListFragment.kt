@@ -51,14 +51,13 @@ import org.catrobat.catroid.content.Project
 import org.catrobat.catroid.content.Scene
 import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.io.StorageOperations
-import org.catrobat.catroid.koin.start
 import org.catrobat.catroid.merge.ImportProjectHelper
 import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.ProjectActivity
 import org.catrobat.catroid.ui.ProjectListActivity
 import org.catrobat.catroid.ui.ProjectListActivity.Companion.IMPORT_LOCAL_INTENT
 import org.catrobat.catroid.ui.SpriteActivity
-import org.catrobat.catroid.ui.ScriptFinder
+import org.catrobat.catroid.ui.Finder
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.WebViewActivity
 import org.catrobat.catroid.ui.controller.BackpackListManager
@@ -124,11 +123,11 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         super.onResume()
         SnackbarUtil.showHintSnackbar(requireActivity(), R.string.hint_objects)
 
-        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
             handleFinderDataManagerLogic()
         }
         else{
-            scriptfinder.close()
+            finder.close()
         }
     }
 
@@ -140,13 +139,13 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         projectManager.currentSprite = currentScene.spriteList[spriteIndex!!]
 
         when (FinderDataManager.instance.type) {
-            ScriptFinder.Type.SCENE.id -> activity.onBackPressed()
-            ScriptFinder.Type.SPRITE.id -> {}
+            FinderDataManager.FragmentType.SCENE.id -> activity.onBackPressed()
+            FinderDataManager.FragmentType.SPRITE.id -> {}
             else -> startActivity(createSpriteActivityIntent(FinderDataManager.instance.type))
         }
 
         val sceneAndSpriteName = createActionBarTitle()
-        scriptfinder.onFragmentChanged(sceneAndSpriteName)
+        finder.onFragmentChanged(sceneAndSpriteName)
         scrollToSearchResult()
         hideKeyboard()
     }
@@ -158,7 +157,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
         val activity = getActivity() as ProjectActivity
 
-        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+        finder?.setOnResultFoundListener(object : Finder.OnResultFoundListener {
             override fun onResultFound(
                 sceneIndex: Int,
                 spriteIndex: Int,
@@ -176,13 +175,13 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
                 when (type) {
-                    ScriptFinder.Type.SPRITE.id -> {
+                    FinderDataManager.FragmentType.SPRITE.id -> {
                         textView?.text = createActionBarTitle()
                         initializeAdapter()
                         adapter.notifyDataSetChanged()
                         scrollToSearchResult()
                     }
-                    ScriptFinder.Type.SCENE.id -> {
+                    FinderDataManager.FragmentType.SCENE.id -> {
                         activity.onBackPressed()
                     }
                     else -> {
@@ -194,17 +193,17 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             }
         })
 
-        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+        finder?.setOnCloseListener(object : Finder.OnCloseListener {
             override fun onClose() {
                 finishActionMode()
                 activity.findViewById<View>(R.id.toolbar).visibility = View.VISIBLE
             }
         })
 
-        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+        finder?.setOnOpenListener(object : Finder.OnOpenListener {
             override fun onOpen() {
                 activity.findViewById<View>(R.id.toolbar).visibility = View.GONE
-                scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SPRITE)
+                finder.setInitiatingFragment(FinderDataManager.FragmentType.SPRITE)
                 val order = arrayOf(2,3,4,5)
                 FinderDataManager.instance.setSearchOrder(order)
             }
@@ -217,8 +216,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         intent.putExtra(
             SpriteActivity.EXTRA_FRAGMENT_POSITION,
             when (type) {
-                ScriptFinder.Type.SOUND.id -> SpriteActivity.FRAGMENT_SOUNDS
-                ScriptFinder.Type.LOOK.id -> SpriteActivity.FRAGMENT_LOOKS
+                FinderDataManager.FragmentType.SOUND.id -> SpriteActivity.FRAGMENT_SOUNDS
+                FinderDataManager.FragmentType.LOOK.id -> SpriteActivity.FRAGMENT_LOOKS
                 else -> SpriteActivity.FRAGMENT_SCRIPTS
             }
         )
@@ -441,8 +440,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
     }
 
     override fun onItemClick(item: Sprite?, selectionManager: MultiSelectionManager?) {
-        if (scriptfinder.isOpen){
-            scriptfinder.close()
+        if (finder.isOpen){
+            finder.close()
         }
         if (item is GroupSprite) {
             item.isCollapsed = !item.isCollapsed

@@ -45,7 +45,7 @@ import org.catrobat.catroid.content.Scene
 import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.io.StorageOperations
 import org.catrobat.catroid.ui.FinderDataManager
-import org.catrobat.catroid.ui.ScriptFinder
+import org.catrobat.catroid.ui.Finder
 import org.catrobat.catroid.ui.SpriteActivity
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.controller.BackpackListManager
@@ -81,7 +81,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
         currentSprite = ProjectManager.getInstance().currentSprite
 
-        scriptfinder?.setOnResultFoundListener(object : ScriptFinder.OnResultFoundListener {
+        finder?.setOnResultFoundListener(object : Finder.OnResultFoundListener {
             override fun onResultFound(
                 sceneIndex: Int,
                 spriteIndex: Int,
@@ -95,7 +95,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
                 currentScene = currentProject.sceneList[sceneIndex]
                 FinderDataManager.instance.type = type
 
-                if(type == ScriptFinder.Type.SPRITE.id) {
+                if(type == FinderDataManager.FragmentType.SPRITE.id) {
                     textView?.text = createActionBarTitle(2)
                 }
                 else{
@@ -129,7 +129,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
                 hideKeyboard()
             }
         })
-        scriptfinder?.setOnCloseListener(object : ScriptFinder.OnCloseListener {
+        finder?.setOnCloseListener(object : Finder.OnCloseListener {
             override fun onClose() {
                 finishActionMode()
                 if (!activity.isFinishing) {
@@ -144,10 +144,11 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
             }
         })
 
-        scriptfinder?.setOnOpenListener(object : ScriptFinder.OnOpenListener {
+        finder?.setOnOpenListener(object : Finder.OnOpenListener {
             override fun onOpen() {
-                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.NONE){
-                    scriptfinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.LOOK)
+                if (FinderDataManager.instance.getInitiatingFragment() == FinderDataManager.FragmentType
+                    .NONE){
+                    finder.setInitiatingFragment(FinderDataManager.FragmentType.LOOK)
                     val order = arrayOf(4,5,3)
                     FinderDataManager.instance.setSearchOrder(order)
                 }
@@ -156,9 +157,9 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
             }
         })
 
-        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+        if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
             val sceneAndSpriteName = createActionBarTitle(1)
-            scriptfinder.onFragmentChanged(sceneAndSpriteName)
+            finder.onFragmentChanged(sceneAndSpriteName)
             scrollToSearchResult()
         }
         return parentView

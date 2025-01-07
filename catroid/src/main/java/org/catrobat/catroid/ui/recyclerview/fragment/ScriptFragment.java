@@ -39,8 +39,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ListAdapter;
 
-import com.google.android.material.tabs.TabLayout;
-
 import org.catrobat.catroid.BuildConfig;
 
 import org.catrobat.catroid.ProjectManager;
@@ -68,7 +66,7 @@ import org.catrobat.catroid.io.asynctask.ProjectLoader;
 import org.catrobat.catroid.io.asynctask.ProjectSaver;
 import org.catrobat.catroid.ui.BottomBar;
 import org.catrobat.catroid.ui.FinderDataManager;
-import org.catrobat.catroid.ui.ScriptFinder;
+import org.catrobat.catroid.ui.Finder;
 import org.catrobat.catroid.ui.SpriteActivity;
 import org.catrobat.catroid.ui.SpriteActivityOnTabSelectedListenerKt;
 import org.catrobat.catroid.ui.UiUtils;
@@ -142,7 +140,7 @@ public class ScriptFragment extends ListFragment implements
 	private ActionMode actionMode;
 	private BrickAdapter adapter;
 	private BrickListView listView;
-	private ScriptFinder scriptFinder;
+	private Finder finder;
 	private String currentSceneName;
 	private String currentSpriteName;
 	private int undoBrickPosition;
@@ -295,8 +293,8 @@ public class ScriptFragment extends ListFragment implements
 		activity = (SpriteActivity) getActivity();
 		SettingsFragment.setToChosenLanguage(activity);
 
-		scriptFinder = view.findViewById(R.id.findview);
-		scriptFinder.setOnResultFoundListener((sceneIndex, spriteIndex, brickIndex,type,
+		finder = view.findViewById(R.id.findview);
+		finder.setOnResultFoundListener((sceneIndex, spriteIndex, brickIndex,type,
 				totalResults,
 				textView
 				) -> {
@@ -305,7 +303,7 @@ public class ScriptFragment extends ListFragment implements
 			Sprite currentSprite = currentScene.getSpriteList().get(spriteIndex);
 			FinderDataManager.Companion.getInstance().setType(type);
 
-			if(type != ScriptFinder.Type.SPRITE.getId()) {
+			if(type != FinderDataManager.FragmentType.SPRITE.getId()) {
 				textView.setText(createActionBarTitle(currentProject, currentScene, currentSprite,1));
 			}
 			else{
@@ -315,7 +313,7 @@ public class ScriptFragment extends ListFragment implements
 			ProjectManager.getInstance().setCurrentSceneAndSprite(currentScene.getName(), currentSprite.getName());
 			FinderDataManager.Companion.getInstance().setCurrentMatchIndex(brickIndex);
 
-			if(type != ScriptFinder.Type.SCRIPT.getId()){
+			if(type != FinderDataManager.FragmentType.SCRIPT.getId()){
 				switch (type){
 					case 1:
 						activity.onBackPressed();
@@ -342,7 +340,7 @@ public class ScriptFragment extends ListFragment implements
 			}
 		});
 
-		scriptFinder.setOnCloseListener(() -> {
+		finder.setOnCloseListener(() -> {
 			listView.cancelHighlighting();
 			finishActionMode();
 			if (activity != null && !activity.isFinishing()) {
@@ -354,9 +352,9 @@ public class ScriptFragment extends ListFragment implements
 			activity.findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
 		});
 
-		scriptFinder.setOnOpenListener(() -> {
-			if (FinderDataManager.Companion.getInstance().getInitiatingFragment() == FinderDataManager.InitiatingFragmentEnum.NONE) {
-				scriptFinder.setInitiatingFragment(FinderDataManager.InitiatingFragmentEnum.SCRIPT);
+		finder.setOnOpenListener(() -> {
+			if (FinderDataManager.Companion.getInstance().getInitiatingFragment() == FinderDataManager.FragmentType.NONE) {
+				finder.setInitiatingFragment(FinderDataManager.FragmentType.SCRIPT);
 				Integer[] order = {3, 4, 5};
 				FinderDataManager.Companion.getInstance().setSearchOrder(order);
 			}
@@ -364,12 +362,12 @@ public class ScriptFragment extends ListFragment implements
 			activity.findViewById(R.id.toolbar).setVisibility(View.GONE);
 		});
 
-		if (FinderDataManager.Companion.getInstance().getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
+		if (FinderDataManager.Companion.getInstance().getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
 			String sceneAndSpriteName =
 					createActionBarTitle(ProjectManager.getInstance().getCurrentProject(),
 							ProjectManager.getInstance().getStartScene(),
 							ProjectManager.getInstance().getCurrentSprite(),1);
-			scriptFinder.onFragmentChanged(sceneAndSpriteName);
+			finder.onFragmentChanged(sceneAndSpriteName);
 			int indexSearch = FinderDataManager.Companion.getInstance().getSearchResultIndex();
 			int brickIndex = FinderDataManager.Companion.getInstance().getSearchResults().get(indexSearch)[2];
 			listView.smoothScrollToPosition(brickIndex);
@@ -408,7 +406,7 @@ public class ScriptFragment extends ListFragment implements
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		if (scriptFinder.isOpen() && activity != null) {
+		if (finder.isOpen() && activity != null) {
 			activity.findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
 		}
 	}
@@ -529,7 +527,7 @@ public class ScriptFragment extends ListFragment implements
 				switchToCatblocks();
 				break;
 			case R.id.find:
-				scriptFinder.open();
+				finder.open();
 				break;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -1148,12 +1146,12 @@ public class ScriptFragment extends ListFragment implements
 	}
 
 	public boolean isFinderOpen() {
-		return scriptFinder.isOpen();
+		return finder.isOpen();
 	}
 
 	public void closeFinder() {
-		if (!scriptFinder.isClosed()) {
-			scriptFinder.close();
+		if (!finder.isClosed()) {
+			finder.close();
 		}
 	}
 }

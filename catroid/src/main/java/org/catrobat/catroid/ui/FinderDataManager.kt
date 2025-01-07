@@ -31,6 +31,14 @@ class FinderDataManager {
             FinderDataManager()
         }
     }
+    enum class FragmentType(val id: Int){
+        NONE(0),
+        SCENE(1),
+        SPRITE(2),
+        SCRIPT(3),
+        LOOK(4),
+        SOUND(5)
+    }
     enum class InitiatingFragmentEnum(val id: Int){
         NONE(0),
         SCENE(1),
@@ -39,8 +47,7 @@ class FinderDataManager {
         LOOK(4),
         SOUND(5)
     }
-
-    private var initiatingFragment: InitiatingFragmentEnum = InitiatingFragmentEnum.NONE
+    private var initiatingfragment:FragmentType = FragmentType.NONE
     private var searchResults: MutableList<Array<Int>>? = null
     private var searchResultIndex = -1
     private var searchQuery: String? = null
@@ -73,12 +80,12 @@ class FinderDataManager {
         searchResults?.add(array)
     }
 
-    fun getInitiatingFragment(): InitiatingFragmentEnum{
-        return initiatingFragment
+    fun getInitiatingFragment(): FragmentType {
+        return initiatingfragment
     }
 
-    fun setInitiatingFragment(initiatingfragment:InitiatingFragmentEnum){
-        initiatingFragment = initiatingfragment
+    fun setInitiatingFragment(initiatingFragment:FragmentType){
+        initiatingfragment = initiatingFragment
     }
 
     fun initializeSearchResults(){
