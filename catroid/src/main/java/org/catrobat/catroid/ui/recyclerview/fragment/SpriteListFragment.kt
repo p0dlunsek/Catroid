@@ -51,6 +51,7 @@ import org.catrobat.catroid.content.Project
 import org.catrobat.catroid.content.Scene
 import org.catrobat.catroid.content.Sprite
 import org.catrobat.catroid.io.StorageOperations
+import org.catrobat.catroid.koin.start
 import org.catrobat.catroid.merge.ImportProjectHelper
 import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.ProjectActivity
@@ -120,50 +121,36 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
         initializeAdapter()
 
-        val activity = getActivity() as ProjectActivity
         super.onResume()
         SnackbarUtil.showHintSnackbar(requireActivity(), R.string.hint_objects)
 
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
-
-            val searchIndex = FinderDataManager.instance.getSearchResultIndex()
-            val spriteIndex = FinderDataManager.instance.getSearchResults()?.get(searchIndex)?.get(1)
-            projectManager.currentSprite = currentScene.spriteList[spriteIndex!!]
-
-
-            when(FinderDataManager.instance.type){
-
-                ScriptFinder.Type.SCENE.id -> {
-                    activity.onBackPressed()
-                }
-
-                ScriptFinder.Type.SOUND.id , ScriptFinder.Type.LOOK.id , ScriptFinder.Type.SCRIPT.id -> {
-                    val intent = Intent(requireContext(), SpriteActivity::class.java)
-                    intent.putExtra(
-                        SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                        when (FinderDataManager.instance.type) {
-                            ScriptFinder.Type.SOUND.id -> SpriteActivity.FRAGMENT_SOUNDS
-                            ScriptFinder.Type.LOOK.id -> SpriteActivity.FRAGMENT_LOOKS
-                            else -> SpriteActivity.FRAGMENT_SCRIPTS
-                        }
-                    )
-                    startActivity(intent)
-                }
-            }
-
-            val sceneAndSpriteName = createActionBarTitle()
-            scriptfinder.onFragmentChanged(sceneAndSpriteName)
-            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-            if (value != null) {
-                recyclerView.scrollToPosition(value)
-            }
-            hideKeyboard()
+            handleFinderDataManagerLogic()
         }
         else{
             scriptfinder.close()
         }
     }
+
+    private fun handleFinderDataManagerLogic() {
+
+        val activity = getActivity() as ProjectActivity
+        val searchIndex = FinderDataManager.instance.getSearchResultIndex()
+        val spriteIndex = FinderDataManager.instance.getSearchResults()?.get(searchIndex)?.get(1)
+        projectManager.currentSprite = currentScene.spriteList[spriteIndex!!]
+
+        when (FinderDataManager.instance.type) {
+            ScriptFinder.Type.SCENE.id -> activity.onBackPressed()
+            ScriptFinder.Type.SPRITE.id -> {}
+            else -> startActivity(createSpriteActivityIntent(FinderDataManager.instance.type))
+        }
+
+        val sceneAndSpriteName = createActionBarTitle()
+        scriptfinder.onFragmentChanged(sceneAndSpriteName)
+        scrollToSearchResult()
+        hideKeyboard()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val parentView = super.onCreateView(inflater, container, savedInstanceState)
         recyclerView = parentView!!.findViewById(R.id.recycler_view)
@@ -193,38 +180,13 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                         textView?.text = createActionBarTitle()
                         initializeAdapter()
                         adapter.notifyDataSetChanged()
-                        val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-                        val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-                        if (value != null) {
-                            scriptfinder.showNavigationButtons()
-                            recyclerView.scrollToPosition(value)
-                        }
+                        scrollToSearchResult()
                     }
                     ScriptFinder.Type.SCENE.id -> {
                         activity.onBackPressed()
                     }
-                    ScriptFinder.Type.SCRIPT.id -> {
-                        val intent = Intent(requireContext(), SpriteActivity::class.java)
-                        intent.putExtra(
-                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                            SpriteActivity.FRAGMENT_SCRIPTS
-                        )
-                        startActivity(intent)
-                    }
-                    ScriptFinder.Type.LOOK.id -> {
-                        val intent = Intent(requireContext(), SpriteActivity::class.java)
-                        intent.putExtra(
-                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                            SpriteActivity.FRAGMENT_LOOKS
-                        )
-                        startActivity(intent)
-                    }
-                    ScriptFinder.Type.SOUND.id -> {
-                        val intent = Intent(requireContext(), SpriteActivity::class.java)
-                        intent.putExtra(
-                            SpriteActivity.EXTRA_FRAGMENT_POSITION,
-                            SpriteActivity.FRAGMENT_SOUNDS
-                        )
+                    else -> {
+                        val intent = createSpriteActivityIntent(type)
                         startActivity(intent)
                     }
                 }
@@ -248,8 +210,21 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             }
         })
         return parentView
-
     }
+
+    private fun createSpriteActivityIntent(type: Int): Intent {
+        val intent = Intent(requireContext(), SpriteActivity::class.java)
+        intent.putExtra(
+            SpriteActivity.EXTRA_FRAGMENT_POSITION,
+            when (type) {
+                ScriptFinder.Type.SOUND.id -> SpriteActivity.FRAGMENT_SOUNDS
+                ScriptFinder.Type.LOOK.id -> SpriteActivity.FRAGMENT_LOOKS
+                else -> SpriteActivity.FRAGMENT_SCRIPTS
+            }
+        )
+        return intent
+    }
+
     fun createActionBarTitle(): String {
         return currentScene.name
     }

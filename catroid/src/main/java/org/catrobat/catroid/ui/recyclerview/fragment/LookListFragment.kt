@@ -159,11 +159,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
             val sceneAndSpriteName = createActionBarTitle(1)
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
-            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-            if (value != null) {
-                recyclerView.scrollToPosition(value)
-            }
+            scrollToSearchResult()
         }
         return parentView
     }

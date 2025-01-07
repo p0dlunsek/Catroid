@@ -339,7 +339,7 @@ class ScriptFinder(context: Context, attrs: AttributeSet?) : LinearLayout(contex
             binding.searchBar.requestFocus()
     }
 
-    fun openForChangeFragment(){
+    private fun openForChangeFragment(){
         this.visibility = VISIBLE
         showNavigationButtons()
         onOpenListener?.onOpen()

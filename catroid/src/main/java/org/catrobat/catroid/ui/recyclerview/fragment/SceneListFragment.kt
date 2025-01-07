@@ -84,16 +84,12 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 textView: TextView?
             ) {
 
-                //currentProject = ProjectManager.getInstance().currentProject
                 currentScene = currentProject.sceneList[sceneIndex]
                 FinderDataManager.instance.type = type
 
 
                 if (type == ScriptFinder.Type.SCENE.id) {
                     textView?.text = createActionBarTitle()
-                }
-                else {
-                    //currentSprite = currentScene.spriteList[spriteIndex]
                 }
 
                 FinderDataManager.instance.currentMatchIndex = brickIndex
@@ -105,13 +101,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                 } else {
                     initializeAdapter()
                     adapter.notifyDataSetChanged()
-                    val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-                    val value =
-                        FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-                    if (value != null) {
-                        scriptfinder.showNavigationButtons()
-                        recyclerView.scrollToPosition(value)
-                    }
+                    scrollToSearchResult()
                 }
                 hideKeyboard()
             }
@@ -155,18 +145,13 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
             val sceneAndSpriteName = createActionBarTitle()
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
-            val indexSearch = FinderDataManager.instance.getSearchResultIndex()
-            val value = FinderDataManager.instance.getSearchResults()?.get(indexSearch)?.get(2)
-            if (value != null) {
-                recyclerView.scrollToPosition(value)
-            }
+            scrollToSearchResult()
             hideKeyboard()
         }
         else{
             scriptfinder.close()
         }
     }
-
     private fun switchToSpriteListFragment() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SpriteListFragment(), SpriteListFragment.TAG)

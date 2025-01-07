@@ -52,6 +52,7 @@ import org.catrobat.catroid.ui.recyclerview.dialog.textwatcher.DuplicateInputTex
 import org.catrobat.catroid.ui.recyclerview.util.UniqueNameProvider;
 import org.catrobat.catroid.ui.recyclerview.viewholder.CheckableViewHolder;
 import org.catrobat.catroid.utils.ToastUtil;
+import org.catrobat.catroid.ui.FinderDataManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Retention;
@@ -64,7 +65,6 @@ import androidx.annotation.PluralsRes;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -576,5 +576,21 @@ public abstract class RecyclerViewFragment<T extends Nameable> extends Fragment 
 	protected void mergeProjects(List<T> selectedProjects, String mergeProjectName) {
 		ToastUtil.showSuccess(getContext(), R.string.merging_project_text);
 		finishActionMode();
+	}
+
+	protected void scrollToSearchResult() {
+		int indexSearch = FinderDataManager.Companion.getInstance().getSearchResultIndex();
+		List<Integer[]> searchResults =
+				FinderDataManager.Companion.getInstance().getSearchResults();
+
+		if (searchResults != null && indexSearch < searchResults.size()) {
+			Integer[] result = searchResults.get(indexSearch);
+			if (result != null && result.length > 2) {
+				Integer value = result[2];
+				if (value != null) {
+					recyclerView.scrollToPosition(value);
+				}
+			}
+		}
 	}
 }

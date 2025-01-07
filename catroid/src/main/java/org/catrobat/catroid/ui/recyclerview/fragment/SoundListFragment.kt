@@ -155,11 +155,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         if (instance.getInitiatingFragment() != FinderDataManager.InitiatingFragmentEnum.NONE) {
             val sceneAndSpriteName = createActionBarTitle(1)
             scriptfinder.onFragmentChanged(sceneAndSpriteName)
-            val indexSearch = instance.getSearchResultIndex()
-            val value = instance.getSearchResults()?.get(indexSearch)?.get(2)
-            if (value != null) {
-                recyclerView.scrollToPosition(value)
-            }
+            scrollToSearchResult()
         }
         return parentView
     }
