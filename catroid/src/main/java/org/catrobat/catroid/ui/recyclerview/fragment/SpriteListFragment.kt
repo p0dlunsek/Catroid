@@ -29,8 +29,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -40,7 +38,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.PluralsRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import org.catrobat.catroid.ProjectManager
@@ -64,7 +61,6 @@ import org.catrobat.catroid.ui.ScriptFinder
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.WebViewActivity
 import org.catrobat.catroid.ui.controller.BackpackListManager
-import org.catrobat.catroid.ui.loadFragment
 import org.catrobat.catroid.ui.recyclerview.adapter.MultiViewSpriteAdapter
 import org.catrobat.catroid.ui.recyclerview.adapter.draganddrop.TouchHelperAdapterInterface
 import org.catrobat.catroid.ui.recyclerview.adapter.draganddrop.TouchHelperCallback
@@ -75,7 +71,6 @@ import org.catrobat.catroid.ui.recyclerview.dialog.TextInputDialog
 import org.catrobat.catroid.ui.recyclerview.dialog.textwatcher.DuplicateInputTextWatcher
 import org.catrobat.catroid.ui.recyclerview.util.UniqueNameProvider
 import org.catrobat.catroid.ui.recyclerview.viewholder.CheckableViewHolder
-import org.catrobat.catroid.ui.removeTabLayout
 import org.catrobat.catroid.utils.SnackbarUtil
 import org.catrobat.catroid.utils.ToastUtil
 import org.koin.android.ext.android.inject
@@ -169,7 +164,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             scriptfinder.close()
         }
     }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val parentView = super.onCreateView(inflater, container, savedInstanceState)
         recyclerView = parentView!!.findViewById(R.id.recycler_view)
         currentProject = ProjectManager.getInstance().currentProject
@@ -505,7 +500,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
         val itemList = mutableListOf<Sprite?>()
         itemList.add(item)
         val hiddenMenuOptionIds = mutableListOf<Int>(
-            R.id.new_group, R.id.project_options, R.id.new_scene, R.id.show_details, R.id.edit
+            R.id.new_group, R.id.project_options, R.id.new_scene, R.id.show_details, R.id.edit,R
+                .id.find
         )
         if (item is GroupSprite) {
             hiddenMenuOptionIds.add(R.id.backpack)

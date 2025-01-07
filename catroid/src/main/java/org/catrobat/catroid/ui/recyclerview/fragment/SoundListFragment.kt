@@ -71,7 +71,7 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         @JvmField
         val TAG = SoundListFragment::class.java.simpleName
     }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val parentView = super.onCreateView(inflater, container, savedInstanceState)
         activity = getActivity() as SpriteActivity?
         recyclerView = parentView!!.findViewById(R.id.recycler_view)
@@ -163,10 +163,6 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
         }
         return parentView
     }
-
-    private fun highlightBrick(index:Int) {
-
-    }
     private fun hideKeyboard() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(requireView().windowToken, 0)
@@ -180,15 +176,14 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
     }
 
     fun createActionBarTitle(flag: Int): String {
-        if(flag == 1) {
-            return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
+        return if(flag == 1) {
+            if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
                 currentSprite.name
             } else {
                 currentScene.name + ": " + currentSprite.name
             }
-        }
-        else{
-            return currentScene.name
+        } else{
+            currentScene.name
         }
     }
 
@@ -335,7 +330,8 @@ class SoundListFragment : RecyclerViewFragment<SoundInfo?>() {
             R.id.project_options,
             R.id.edit,
             R.id.from_local,
-            R.id.from_library
+            R.id.from_library,
+            R.id.find
         )
         val popupMenu = UiUtils.createSettingsPopUpMenu(view, requireContext(), R.menu
             .menu_project_activity, hiddenOptionMenuIds)

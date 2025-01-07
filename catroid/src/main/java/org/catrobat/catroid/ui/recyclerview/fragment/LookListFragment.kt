@@ -73,7 +73,7 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
         @JvmField
         val TAG = LookListFragment::class.java.simpleName
     }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val parentView = super.onCreateView(inflater, container, savedInstanceState)
         activity = getActivity() as SpriteActivity?
         recyclerView = parentView!!.findViewById(R.id.recycler_view)
@@ -176,15 +176,14 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
     }
 
     fun createActionBarTitle(flag: Int): String {
-        if(flag == 1) {
-            return if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
+        return if(flag == 1) {
+            if (currentProject.sceneList != null && currentProject.sceneList.size == 1) {
                 currentSprite.name
             } else {
                 currentScene.name + ": " + currentSprite.name
             }
-        }
-        else{
-            return currentScene.name
+        } else{
+            currentScene.name
         }
     }
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -375,7 +374,8 @@ class LookListFragment : RecyclerViewFragment<LookData?>() {
             R.id.project_options,
             R.id.edit,
             R.id.from_local,
-            R.id.from_library
+            R.id.from_library,
+            R.id.find
         )
         val popupMenu = UiUtils.createSettingsPopUpMenu(view, requireContext(), R.menu
             .menu_project_activity, hiddenOptionMenuIds)

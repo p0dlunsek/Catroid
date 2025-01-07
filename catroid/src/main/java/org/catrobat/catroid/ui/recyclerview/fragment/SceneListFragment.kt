@@ -48,10 +48,8 @@ import org.catrobat.catroid.io.asynctask.loadProject
 import org.catrobat.catroid.ui.FinderDataManager
 import org.catrobat.catroid.ui.ProjectActivity
 import org.catrobat.catroid.ui.ScriptFinder
-import org.catrobat.catroid.ui.SpriteActivity
 import org.catrobat.catroid.ui.UiUtils
 import org.catrobat.catroid.ui.controller.BackpackListManager
-import org.catrobat.catroid.ui.loadFragment
 import org.catrobat.catroid.ui.recyclerview.adapter.SceneAdapter
 import org.catrobat.catroid.ui.recyclerview.adapter.multiselection.MultiSelectionManager
 import org.catrobat.catroid.ui.recyclerview.backpack.BackpackActivity
@@ -337,7 +335,8 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
             R.id.project_options,
             R.id.edit,
             R.id.from_local,
-            R.id.from_library
+            R.id.from_library,
+            R.id.find
         )
         val popupMenu = UiUtils.createSettingsPopUpMenu(view, requireContext(), R.menu
             .menu_project_activity, hiddenOptionMenuIds)
