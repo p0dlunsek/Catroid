@@ -104,24 +104,29 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 					context.getTheme());
 			holder.image.setImageDrawable(drawable);
 			holder.checkBox.setVisibility(GONE);
+			if(isThisFoundObject(position)){
+				highlightTheFoundObject(holder);
+			}
+			else{
+				cancelHighlightTheFoundObject(holder);
+			}
 			return;
 		}
 
-		if (holder.getItemViewType() == BACKGROUND) {
+		else if (holder.getItemViewType() == BACKGROUND) {
 			holder.itemView.setOnLongClickListener(null);
 			holder.checkBox.setVisibility(GONE);
-			if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
+			if (isThisFoundObject(position)) {
 				View view_background_button = holder.itemView.findViewById(R.id.view_holder_background);
-				view_background_button.setBackgroundColor(Color.parseColor("#165C72"));
+				view_background_button.setBackgroundResource(R.drawable.button_background_pressed);
 			}
 			else{
-				holder.itemView.setBackgroundColor(Color.parseColor("#00475E"));
-				View list_headline_sprites = holder.itemView.findViewById(R.id.list_headline_sprites);
-				list_headline_sprites.setBackgroundColor(Color.parseColor("#04222C"));
+				View view_background_button = holder.itemView.findViewById(R.id.view_holder_background);
+				view_background_button.setBackgroundResource(R.drawable.button_background_selector);
 			}
 		}
 
-		if (holder.getItemViewType() == SPRITE_GROUP_ITEM) {
+		else if (holder.getItemViewType() == SPRITE_GROUP_ITEM) {
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams
 					.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 			holder.itemView.setLayoutParams(params);
@@ -129,14 +134,20 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 				params.height = 0;
 				holder.itemView.setLayoutParams(params);
 			}
+			if(isThisFoundObject(position)){
+				highlightTheFoundObject(holder);
+			}
+			else{
+				cancelHighlightTheFoundObject(holder);
+			}
 		}
 
 		else{
-			if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
-				holder.itemView.setBackgroundColor(Color.parseColor("#165C72"));
+			if(isThisFoundObject(position)){
+				highlightTheFoundObject(holder);
 			}
 			else{
-				holder.itemView.setBackgroundColor(Color.parseColor("#00475E"));
+				cancelHighlightTheFoundObject(holder);
 			}
 		}
 
@@ -158,7 +169,15 @@ public class MultiViewSpriteAdapter extends SpriteAdapter {
 			holder.details.setVisibility(GONE);
 		}
 	}
-
+	private boolean isThisFoundObject(int position){
+		return position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex();
+	}
+	private void cancelHighlightTheFoundObject(ExtendedViewHolder holder){
+		holder.itemView.setBackgroundResource(R.drawable.button_background_selector);
+	}
+	private void highlightTheFoundObject(ExtendedViewHolder holder){
+		holder.itemView.setBackgroundResource(R.drawable.button_background_pressed);
+	}
 	@Override
 	public @ViewType int getItemViewType(int position) {
 		if (position == 0) {

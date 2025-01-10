@@ -95,6 +95,7 @@ class SceneListFragment : RecyclerViewFragment<Scene?>(),
                     initializeAdapter()
                     adapter.notifyDataSetChanged()
                     scrollToSearchResult()
+                    finder.disableFocusSearchBar()
                 }
                 hideKeyboard()
             }

@@ -36,10 +36,10 @@ class LookAdapter(items: List<LookData?>?) : ExtendedRVAdapter<LookData?>(items)
         val item = items[position]
         holder.title.text = item?.name
         holder.image.setImageBitmap(item?.thumbnailBitmap)
-        if (position == FinderDataManager.instance.currentMatchIndex)
-            holder.itemView.setBackgroundColor(Color.parseColor("#165C72"))
-        else {
-            holder.itemView.setBackgroundColor(Color.parseColor("#00475E"))
+        if (position == FinderDataManager.instance.currentMatchIndex) {
+            holder.itemView.setBackgroundResource(R.drawable.button_background_pressed)
+        } else {
+            holder.itemView.setBackgroundResource(R.drawable.button_background_selector)
         }
         if (showDetails) {
             val measure = item?.measure

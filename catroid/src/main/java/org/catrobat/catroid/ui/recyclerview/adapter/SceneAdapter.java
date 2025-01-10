@@ -58,14 +58,11 @@ public class SceneAdapter extends ExtendedRVAdapter<Scene> {
 
 		loader.loadAndShowScreenshot(projectDir.getName(), item.getDirectory().getName(), false, holder.image);
 
-
 		if (position == FinderDataManager.Companion.getInstance().getCurrentMatchIndex()) {
-			holder.itemView.setBackgroundColor(Color.parseColor("#165C72"));
+			holder.itemView.setBackgroundResource(R.drawable.button_background_pressed);
+		} else {
+			holder.itemView.setBackgroundResource(R.drawable.button_background_selector);
 		}
-		else{
-			holder.itemView.setBackgroundColor(Color.parseColor("#00475E"));
-		}
-
 
 		if (showDetails) {
 			holder.details.setText(String.format(Locale.getDefault(),

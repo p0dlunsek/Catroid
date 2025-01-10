@@ -332,13 +332,16 @@ class Finder(context: Context, attrs: AttributeSet?) : LinearLayout(context, att
             onOpenListener?.onOpen()
             binding.searchBar.requestFocus()
     }
+    fun disableFocusSearchBar(){
+        binding.searchBar.isFocusable = false
+    }
 
     private fun openForChangeFragment(){
         this.visibility = VISIBLE
         showNavigationButtons()
         onOpenListener?.onOpen()
         binding.searchBar.setText(FinderDataManager.instance.getSearchQuery())
-        binding.searchBar.isFocusableInTouchMode = false
+        binding.searchBar.isFocusable = false
     }
 
     fun close() {

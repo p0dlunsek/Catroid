@@ -46,6 +46,7 @@ import org.catrobat.catroid.common.Constants
 import org.catrobat.catroid.common.Constants.TMP_IMAGE_FILE_NAME
 import org.catrobat.catroid.common.FlavoredConstants
 import org.catrobat.catroid.common.SharedPreferenceKeys
+import org.catrobat.catroid.content.GroupItemSprite
 import org.catrobat.catroid.content.GroupSprite
 import org.catrobat.catroid.content.Project
 import org.catrobat.catroid.content.Scene
@@ -118,6 +119,7 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
 
     override fun onResume() {
         currentScene = ProjectManager.getInstance().currentlyEditedScene
+
         initializeAdapter()
 
         super.onResume()
@@ -125,6 +127,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
 
         if (FinderDataManager.instance.getInitiatingFragment() != FinderDataManager.FragmentType.NONE) {
             handleFinderDataManagerLogic()
+            unCollapseFoundObject(FinderDataManager.instance.currentMatchIndex)
+
         }
         else{
             finder.close()
@@ -168,9 +172,8 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             )   {
 
                 currentProject = ProjectManager.getInstance().currentProject
-                ProjectManager.getInstance().setCurrentlyEditedScene(currentProject.sceneList[sceneIndex])
-                projectManager.currentSprite = currentProject.sceneList[sceneIndex].spriteList[spriteIndex]
-
+                currentScene = currentProject.sceneList[sceneIndex]
+                ProjectManager.getInstance().setCurrentlyEditedScene(currentScene)
 
                 FinderDataManager.instance.currentMatchIndex = brickIndex
 
@@ -178,13 +181,17 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
                     FinderDataManager.FragmentType.SPRITE.id -> {
                         textView?.text = createActionBarTitle()
                         initializeAdapter()
+                        unCollapseFoundObject(spriteIndex)
                         adapter.notifyDataSetChanged()
                         scrollToSearchResult()
+                        finder.disableFocusSearchBar()
+
                     }
                     FinderDataManager.FragmentType.SCENE.id -> {
                         activity.onBackPressed()
                     }
                     else -> {
+                        projectManager.currentSprite = currentProject.sceneList[sceneIndex].spriteList[spriteIndex]
                         val intent = createSpriteActivityIntent(type)
                         startActivity(intent)
                     }
@@ -209,6 +216,20 @@ class SpriteListFragment : RecyclerViewFragment<Sprite?>() {
             }
         })
         return parentView
+    }
+
+    private fun unCollapseFoundObject(spriteIndex: Int) {
+
+        val currentItem = currentScene.spriteList[spriteIndex]
+        if (currentItem is GroupItemSprite && currentItem.isCollapsed){
+            for (i in spriteIndex downTo 1) {
+                val groupItem = currentScene.spriteList[i]
+                if (groupItem is GroupSprite) {
+                    groupItem.isCollapsed = false
+                    break
+                }
+            }
+        }
     }
 
     private fun createSpriteActivityIntent(type: Int): Intent {

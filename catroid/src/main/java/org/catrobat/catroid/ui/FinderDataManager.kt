@@ -39,14 +39,7 @@ class FinderDataManager {
         LOOK(4),
         SOUND(5)
     }
-    enum class InitiatingFragmentEnum(val id: Int){
-        NONE(0),
-        SCENE(1),
-        SPRITE(2),
-        SCRIPT(3),
-        LOOK(4),
-        SOUND(5)
-    }
+
     private var initiatingfragment:FragmentType = FragmentType.NONE
     private var searchResults: MutableList<Array<Int>>? = null
     private var searchResultIndex = -1
